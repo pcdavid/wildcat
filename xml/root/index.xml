@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE document PUBLIC "-//ObjectWeb//DTD ObjectWeb Project Web Site//EN"
+"../../common/dtd/objectweb.dtd">
+<document>
+  <properties>
+    <author email="pcdavid@gmail.com">Pierre-Charles David</author>
+    <title>Home Page</title>
+    <filename>index.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="News" anchor="news">
+      <s2 name="WildCAT 1.0.0 released" anchor="rel_1_0_0">
+	<p>Version 1.0.0 of the core WildCAT framework is now
+	  available <a
+	  href="http://forge.objectweb.org/projects/wildcat">at the
+	  forge</a>.</p>
+      </s2>
+    </s1>
+
+    <s1 name="WildCAT: a toolkit for context-aware applications" anchor="wildcat">
+      <s2 name="What is WildCAT?" anchor="intro">
+        <p>WildCAT is a Java toolkit/framework which can be used to build
+        context-aware applications, of which self-adaptive applications are a
+        special case. From the client applications point of view, it provides a
+        simple and dynamic data-model to represent the execution context of the
+        application, and offers a simple API for the programmers to access this
+        information both synchronously and synchronously (<em>pull</em> and
+        <em>push</em>). Internally, it is a framework designed to facilitate the
+        acquisition and aggregation of contextual data and to create reusable
+        ontologies to represent aspects of the execution context relevant to
+        many applications.</p>
+      </s2>
+      <s2 name="Documentation" anchor="documentation">
+        <p>The current documentation is available <a
+        href="documentation.html">here</a>.</p>
+      </s2>
+      <s2 name="License" anchor="License">
+        <p>WildCAT is free software licensed under the GNU Library General
+        Public License v2.1 (LGPL).</p>
+      </s2>
+      <s2 name="Contact" anchor="contact">
+        <p>For more inforation, contact <a
+        href="mailto:pcdavid@gmail.com">Pierre-Charles David</a>.</p>
+      </s2>
+    </s1>
+  </body>
+</document>

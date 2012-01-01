@@ -1,0 +1,36 @@
+<html>
+  <body>
+    <p>This package contains the main WildCAT classes and interfaces, including
+    everything needed for basic usage (i.e. not configuration).</p>
+    
+    <p>The four types which implement the public WildCAT API are:
+    <ol>
+    <li>{@link Path} (implemented in {@link AbstractPath} and {@link SimplePath}),
+    which represents a location or a set of locations in a WildCAT context. Most
+    public methods which take a path in argument also have variants which take
+    strings and convert them automatically to paths (if possible). Users can also
+    create {@link Path}s explicitely using {@link Context#creatPath(String)}.</li>
+    <li>{@link ContextListener} defines the different callbacks used to notify
+    client when the events they have registered to have occured. There is one
+    method call by kind of event. {@link ContextListenerAdapter} provides a
+    default, empty, implementation of {@link ContextListener} which can be
+    subclassed to override only the methods of interest.</li>
+    <li>{@link EventKind} is an enumeration of the different kinds of
+    user-level events, each corresponding to one method in {@link ContextListener}.
+    This enumeration is used when creating registrations.</li>
+    <li>Finally, {@link Context} is the main class: it uses a hierarchical and dynamic
+    data model of resources and attributes to represent the context and offers
+    APIs to:
+    <ol>
+    <li>query this context (using paths, including patterns)</li>
+    <li>register listeners for events of interests</li>
+    <li>configure the content of the context by mounting and unmounting
+    the appropriate {@link ContextProvider}s at specific locations, in the
+    same way different Unix filesystems can be mounted inside the same, unified
+    hierarchy of directories and files.</li>
+    </ol>
+    <li>
+    </ol>
+    </p>
+  </body>
+</html>

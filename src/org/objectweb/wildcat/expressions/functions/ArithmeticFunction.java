@@ -23,6 +23,8 @@ import org.objectweb.wildcat.expressions.Environment;
 import org.objectweb.wildcat.expressions.EvaluationException;
 
 /**
+ * Base class used to implement arithmetic functions.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public abstract class ArithmeticFunction implements Function {

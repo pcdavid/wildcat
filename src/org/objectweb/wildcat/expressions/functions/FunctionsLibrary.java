@@ -19,11 +19,16 @@
  */
 package org.objectweb.wildcat.expressions.functions;
 
-
 /**
+ * Represents a set of functions wich can be loaded into an interpreter to extend it.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
- *
  */
 public interface FunctionsLibrary {
+    /**
+     * Returns the functions provided by this library.
+     * 
+     * @return the functions provided by this library.
+     */
     Function[] getFunctions();
 }

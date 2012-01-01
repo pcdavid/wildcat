@@ -3,7 +3,6 @@ package org.objectweb.wildcat.events;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Provides some common code for classes which must notify events to an
  * {@link EventListener}.
@@ -35,6 +34,11 @@ public class EventSource {
         }
     }
     
+    /**
+     * Notify the listener (if any) of the specified events.
+     * 
+     * @param events the events to notify.
+     */
     protected synchronized void notify(List<PathEvent> events) {
         if (listener != null) {
             listener.eventOccured(events);

@@ -27,9 +27,9 @@ import java.util.Properties;
 import org.objectweb.wildcat.providers.Sampler;
 
 /**
- * Converts the system properties into {@link Sample}s. For each system
- * property, creates a sample whose name is the name of the property and whose
- * value is the value of the property, as a {@link String}.
+ * Samples the system properties. For each system property, creates a sample whose name is
+ * the name of the property and whose value is the value of the property, as a
+ * {@link String}.
  * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
@@ -43,7 +43,7 @@ public class SystemPropertiesSensor implements Sampler {
         }
         return samples;
     }
-    
+
     public static void main(String[] args) {
         System.out.println(new SystemPropertiesSensor().sample());
     }

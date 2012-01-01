@@ -22,6 +22,8 @@ package org.objectweb.wildcat.expressions.functions;
 import org.objectweb.wildcat.expressions.EvaluationException;
 
 /**
+ * Implements the division function.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class DivideFunction extends ArithmeticFunction {

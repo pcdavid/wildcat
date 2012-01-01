@@ -67,7 +67,7 @@ public enum EventKind {
     /**
      * Indicates that an expression's value has changed.
      * 
-     * @see ContextListener#expressionValueChanged(long, Object, Object, long)
+     * @see ContextListener#expressionValueChanged(Object, Object, Object, long)
      */
     EXPRESSION_CHANGED,
 
@@ -75,7 +75,7 @@ public enum EventKind {
      * Indicates that a boolean expression has occured (value changed from
      * <code>false</code> to <code>true</code>).
      * 
-     * @see ContextListener#conditionOccured(long, long)
+     * @see ContextListener#conditionOccured(Object, long)
      */
     CONDITION_OCCURED;
 }

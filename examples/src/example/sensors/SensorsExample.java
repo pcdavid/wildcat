@@ -21,16 +21,15 @@ package example.sensors;
 
 import static java.util.concurrent.TimeUnit.*;
 import static org.objectweb.wildcat.Context.createPath;
-
-import java.util.List;
+import static org.objectweb.wildcat.EventKind.ATTRIBUTE_CHANGED;
 
 import org.objectweb.wildcat.Context;
-import org.objectweb.wildcat.events.EventListener;
-import org.objectweb.wildcat.events.PathEvent;
 import org.objectweb.wildcat.providers.DynamicContextProvider;
 import org.objectweb.wildcat.sensors.CPUSensor;
 import org.objectweb.wildcat.sensors.JavaRuntimeSensor;
 import org.objectweb.wildcat.sensors.LoadSensor;
+
+import example.LoggingContextListener;
 
 /**
  * This small example show how to attach sensors to resources so that their attributes
@@ -42,30 +41,18 @@ public class SensorsExample {
     public static void main(String[] args) throws Exception {
         Context ctx = new Context();
         DynamicContextProvider provider = ctx.createDynamicContextProvider();
-        provider.setEventListener(new LoggingEventListener());
-        ctx.mount(Context.getRootPath(), provider);
-        provider.createResource(createPath("sys"));
-        provider.createResource(createPath("sys/load"));
-        provider.attachSensor(createPath("sys/load"), new LoadSensor(), 2, SECONDS);
-        provider.startSensor(createPath("sys/load"));
-        provider.createResource(createPath("sys/cpu"));
-        provider.attachSensor(createPath("sys/cpu"), new CPUSensor(), 60, SECONDS);
-        provider.startSensor(createPath("sys/cpu"));
+        ctx.register(ATTRIBUTE_CHANGED, createPath("/sys/*#*"),
+                new LoggingContextListener());
+        ctx.mount("/sys", provider);
+        provider.createResource(createPath("load"));
+        provider.attachSensor(createPath("load"), new LoadSensor(), 2, SECONDS);
+        provider.startSensor(createPath("load"));
+        provider.createResource(createPath("cpu"));
+        provider.attachSensor(createPath("cpu"), new CPUSensor(), 1, SECONDS);
+        provider.startSensor(createPath("cpu"));
         provider.createResource(createPath("jvm"));
         provider.attachSensor(createPath("jvm"), new JavaRuntimeSensor(), 500,
                 MILLISECONDS);
         provider.startSensor(createPath("jvm"));
-    }
-
-    public static class LoggingEventListener implements EventListener {
-        public void eventOccured(PathEvent evt) {
-            System.err.println(evt);
-        }
-
-        public void eventOccured(List<PathEvent> evts) {
-            for (PathEvent evt : evts) {
-                eventOccured(evt);
-            }
-        }
     }
 }

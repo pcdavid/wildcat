@@ -30,7 +30,7 @@ import org.objectweb.wildcat.TimeUtil;
  */
 public class PathRemovedEvent extends PathEvent {
     /**
-     * Creates a new <code>PathRemovedEvent</code>.
+     * Creates a new <code>PathRemovedEvent</code> for the given location and timestamp.
      * 
      * @param path
      *            a path denoting the element which has disappeared
@@ -40,7 +40,14 @@ public class PathRemovedEvent extends PathEvent {
     public PathRemovedEvent(Path path, long timeStamp) {
         super(path, timeStamp);
     }
-    
+
+    /**
+     * Creates a new <code>PathAddedEvent</code> for the given location. The default
+     * timestamp denotes the time of creation of the event.
+     * 
+     * @param path
+     *            a path denoting the new element
+     */
     public PathRemovedEvent(Path path) {
         this(path, TimeUtil.now());
     }

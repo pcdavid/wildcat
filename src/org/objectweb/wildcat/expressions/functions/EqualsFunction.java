@@ -23,6 +23,8 @@ import org.objectweb.wildcat.expressions.Environment;
 import org.objectweb.wildcat.expressions.EvaluationException;
 
 /**
+ * Implements the equality test.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class EqualsFunction implements Function {

@@ -40,7 +40,7 @@ class SimplePath extends AbstractPath {
     /**
      * Syntax for valid names of resources and attributes.
      */
-    //private static final String IDENTIFIER_REGEX = "(?:\\p{Alpha}|_)[\\p{Alnum}_-]*";
+    // private static final String IDENTIFIER_REGEX = "(?:\\p{Alpha}|_)[\\p{Alnum}_-]*";
     private static final String IDENTIFIER_REGEX = "[^/\\*]+";
 
     /**
@@ -311,8 +311,8 @@ class SimplePath extends AbstractPath {
     }
 
     /**
-     * @param pattern
-     * @return
+     * Converts a pattern path into a regexp which can be used to match against a string
+     * representation of definite paths.
      */
     private String patternRegexp(Path pattern) {
         String str = pattern.toString();
@@ -390,8 +390,10 @@ class SimplePath extends AbstractPath {
         }
         return new SimplePath(itsAbsolute, itsDefinite, itsResources, itsAttribute);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.Path#appendResource(java.lang.String)
      */
     public Path appendResource(String name) throws MalformedPathException {

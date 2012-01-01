@@ -14,24 +14,45 @@ import java.util.List;
 public class EventMultiplexer implements EventListener {
     private Collection<EventListener> listeners;
 
+    /**
+     * Creates a new event multiplexer.
+     */
     public EventMultiplexer() {
         listeners = Collections.synchronizedCollection(new HashSet<EventListener>());
     }
 
+    /**
+     * Adds a new listener to the set of targets.
+     * 
+     * @param listener
+     *            the listener to add
+     */
     public void addListener(EventListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes a listener from the set of targets.
+     * 
+     * @param listener
+     *            the listener to remove.
+     */
     public void removeListener(EventListener listener) {
         listeners.remove(listener);
     }
 
+    /**
+     * Forwards the events to all the target listeners in turn, in a unspecified order.
+     */
     public void eventOccured(List<PathEvent> evts) {
         for (EventListener l : listeners) {
             l.eventOccured(evts);
         }
     }
 
+    /**
+     * Forwards the event to all the target listeners in turn, in a unspecified order.
+     */
     public void eventOccured(PathEvent evt) {
         for (EventListener l : listeners) {
             l.eventOccured(evt);

@@ -1,0 +1,25 @@
+<html>
+  <body>
+    <p>This package implements a simple interpreter for the language used in
+    WildCAT to defined synthetic attributes and watched expressions.</p>
+    
+    <p>The acutal language is very simple and supports:
+    <ul>
+    <li>numbers, strings and <em>path</em> litterals</li>
+    <li>arithmetic expressions (<code>+</code>, <code>-</code>,
+    <code>*</code>, <code>div</code>)</li>
+    <li>comparisons (<code>==</code>, <code>!=</code>, <code>&lt</code>, <code>&gt;</code>,
+    <code>&lt;=</code>, <code>&gt;=</code>)
+    <li>boolean operators (<code>and</code>, <code>or</code>)</li>
+    <li>function calls (<code>f(x, y)</code>)
+    </p>
+    
+    <p>The default library of functions is currently minimal and only supports
+    arithmetic functions and access to attributes values. However it is very easy
+    to implement new functions and add them to an interpreter.</p>
+    
+    <p>The front-end for the interpreter is in class {@link BasicInterpreter}, which
+    implements the {@link Interpreter} interface. This simple interface can be used
+    to parse expressions from strings and evaluate them.</p>
+  </body>
+</html>

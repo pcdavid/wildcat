@@ -1,0 +1,25 @@
+<html>
+  <body>
+    <p>This package contains various implementations of the {@link
+    org.objectweb.wildcat.ContextProvider} interface. Most are "infrastructure"
+    providers ({@link EmptyContextProvider}, {@link ExpressionsProvider},
+    {@link OverlayContextProvider}) and do not provide data by themselves.</p>
+    
+    <p>{@link BasicContextProvider} is the default configurable implementation: it
+    uses a simple in-memory implementation of resources and attributes, and can
+    be entirley manipulated programmatically. It is designed to serves as a basis
+    for other providers.</p>
+    
+    <p>{@link DynamicContextProvider} extends {@link BasicContextProvider} with
+    two new features:
+    <ol>
+    <li>the ability to attach {@link Sampler}s (simple data sources) to resources,
+    which will update the resource's attributes automatically according to some
+    sampling rate;</li>
+    <li>the abililty to define <em>synthetic attributes</em> by an expression
+    which can depend on other parts of the context. These attributes will be
+    automatically recomputed when on of the locations they depend on changes.</li>
+    </ol>
+    </p>
+  </body>
+</html>

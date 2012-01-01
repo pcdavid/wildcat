@@ -56,6 +56,8 @@ public abstract class PathEvent {
     }
 
     /**
+     * Returns the path at which the event occured.
+     * 
      * @return the path at which the event occured.
      */
     public Path getPath() {
@@ -63,6 +65,8 @@ public abstract class PathEvent {
     }
 
     /**
+     * Returns the time at which the event occurred.
+     * 
      * @return the time at which the event occurred.
      */
     public long getTimeStamp() {

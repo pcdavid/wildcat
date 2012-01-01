@@ -1,0 +1,17 @@
+<html>
+  <body>
+    <p>This package provides some classes to track dependencies between locations
+    in a context, event when provided by different {@link ContextProvider}s.</p>
+    
+    <p>{@link DependencyGraph} and {@link DependencyGraphImpl} is a generic
+    implementation of a dependency graph to keep track of who depends on whom.</p>
+    
+    <p>{@link ExpressionDepencenciesColletor} is an {@link ExpressionVisitor}
+    which computes the set of context dependencies (paths) of an expression (be it
+    a synthetic attribute definition or a watched expression).</p>
+    
+    <p>{@link DependencyManager} requests update notifications of context
+    locations when it receives an event indicating that one of its
+    dependencies has changed.</p>
+  </body>
+</html>

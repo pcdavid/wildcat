@@ -20,6 +20,8 @@
 package org.objectweb.wildcat.expressions.functions;
 
 /**
+ * Implements the substraction function.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class SubstractFunction extends ArithmeticFunction {

@@ -73,12 +73,7 @@ public class CPUSensor extends TextFileSensor {
             new LineFormat("model_name", "model name\t: {0}"),
             new LineFormat("stepping", "stepping\t: {0,number,integer}"),
             new LineFormat("speed", "cpu MHz\t\t: {0,number}"),
-            new LineFormat("cache", "cache size\t: {0,number,integer} KB"),
-            new LineFormat("bugs_fdiv", "fdiv_bug\t: {0}"), new LineFormat("bugs_hlt", "hlt_bug\t\t: {0}"),
-            new LineFormat("bugs_f00F", "f00f_bug\t: {0}"), new LineFormat("bugs_coma", "coma_bug\t: {0}"),
-            new LineFormat("fpu", "fpu\t\t: {0}"), new LineFormat("fpu_exception", "fpu_exception\t: {0}"),
-            new LineFormat("cpuid_level", "cpuid level\t: {0,number,integer}"), new LineFormat("wp", "wp\t\t: {0}"),
-            new LineFormat("flags", "flags\t\t: {0}"), new LineFormat("bogomips", "bogomips\t: {0,number}") };
+            new LineFormat("cache", "cache size\t: {0,number,integer} KB")};
     
     public static void main(String[] args) {
         System.out.println(new CPUSensor().sample());

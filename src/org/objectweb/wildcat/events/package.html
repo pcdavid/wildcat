@@ -1,0 +1,46 @@
+<html>
+  <body>
+    <p>This package defines the internal events used by WildCAT to
+    track changes in the context. These events are slightly different
+    from the ones used for user-level notifications: user-level event
+    notifications are represented by method calls to the different
+    methods defined in {@link org.objectweb.wildcat.ContextListener
+    ContextListener}, while internal events are reified as objects, so
+    that they can be manipulated (buffered, logged, passed to
+      different threads, etc.) more easily.</p>
+
+    <p>Three kinds of events are defined:
+    <ol>
+      <li>path creation ({@link PathCreatedEvent}) indicate that a new
+      resource or attribute has appeared in the context;</li>
+      <li>path removal ({@link PathRemovedEvent}) indicate that a resource
+      or attribute has disappeared from the context;</li>
+      <li>path change ({@link PathChangedEvent}) indicate that the value
+      of an attribute has changed.</li>
+    </ol>
+    These three classes inherit from {@link PathEvent} which provides two attributes
+    common to all event kinds:
+    <ul>
+    <li>the <em>path</em> at which the event occured;</li>
+    <li>a <em>timestamp</em> indicating when the event occurred.</li>
+    </ul>
+    </p>
+    
+    <p>Classes which want to be notified of event must implement the {@link EventListener}
+    interface.</p>
+    
+    <p>This package also provides some utilities to deal with these events:
+    <ul>
+    <li>{@link EventBuffer} is a listener which stores the events it receives for later
+    (possibly asynchronous) processing.</li>
+    <li>{@link EventSource} can be subclassed by classes which generate events to send
+    them to a listener.</li>
+    <li>{@link EventForwarder} is both an {@link EventListener} and an {@link EventSource},
+    i.e; it forwards all the event notifications it receives to its own listener.</li>
+    <li>{@link EventMultiplexer} is an {@link EventListener} which broadcasts all the
+    events it receives to a dynamically configurable set of target listeners (1-to-many
+    event multiplexer).<li>
+    </ul>
+    </p>
+  </body>
+</html>

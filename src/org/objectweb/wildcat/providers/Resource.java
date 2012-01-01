@@ -144,7 +144,7 @@ class Resource extends EventSource {
      * @return <code>true</code> iff this resource has a sub-resource named
      *         <code>name</code>.
      */
-    public synchronized boolean hasChild(String name) {
+    public boolean hasChild(String name) {
         return children != null && children.containsKey(name);
     }
 
@@ -282,7 +282,7 @@ class Resource extends EventSource {
      * @return <code>true</code> iff this resource has an attribute named
      *         <code>name</code>
      */
-    public synchronized boolean hasAttribute(String name) {
+    public boolean hasAttribute(String name) {
         return attributes != null && attributes.containsKey(name);
     }
 

@@ -10,48 +10,60 @@ import org.objectweb.wildcat.events.EventSource;
 import org.objectweb.wildcat.events.PathEvent;
 
 /**
+ * Base helper class used to implement {@link ContextProvider}s.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
- *
  */
-public abstract class AbstractContextProvider extends EventSource implements ContextProvider {
+public abstract class AbstractContextProvider extends EventSource implements
+        ContextProvider {
     protected DependencyGraph<Path> dependencyGraph;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#getDependencyGraph()
      */
     public synchronized DependencyGraph<Path> getDependencyGraph() {
         return dependencyGraph;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#setDependencyGraph(org.objectweb.wildcat.dependencies.DependencyGraph)
      */
     public synchronized void setDependencyGraph(DependencyGraph<Path> dg) {
         this.dependencyGraph = dg;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#getEventListener()
      */
     public synchronized EventListener getEventListener() {
         return listener;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#setEventListener(org.objectweb.wildcat.events.EventListener)
      */
     public synchronized void setEventListener(EventListener listener) {
         this.listener = listener;
     }
-    
+
     /*
      * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path, org.objectweb.wildcat.events.PathEvent)
+     * 
+     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path,
+     *      org.objectweb.wildcat.events.PathEvent)
      */
     public void update(Path path, PathEvent cause) {
         // Ignore
     }
-    
+
     /*
      * (non-Javadoc)
      * 

@@ -23,17 +23,13 @@ import org.objectweb.wildcat.ContextListener;
 import org.objectweb.wildcat.Path;
 import org.objectweb.wildcat.TimeUtil;
 
-
 /**
- * Simple implementation of {@link org.objectweb.wildcat.ContextListener} which logs all
- * the events using Monolog.
+ * Simple implementation of {@link org.objectweb.wildcat.ContextListener} for example
+ * programs, which logs all the events to stderr.
  * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class LoggingContextListener implements ContextListener {
-    public LoggingContextListener() {
-    }
-
     public void attributeAdded(Path attr, long timeStamp) {
         log("Attribute added: " + attr.toString() + " @ " + TimeUtil.format(timeStamp));
     }
@@ -62,8 +58,8 @@ public class LoggingContextListener implements ContextListener {
 
     public void expressionValueChanged(Object cookie, Object oldValue, Object newValue,
             long timeStamp) {
-        log("Expression " + cookie + " changed" + " (" + oldValue + " => "
-                + newValue + ") @ " + TimeUtil.format(timeStamp));
+        log("Expression " + cookie + " changed" + " (" + oldValue + " => " + newValue
+                + ") @ " + TimeUtil.format(timeStamp));
     }
 
     private void log(String message) {

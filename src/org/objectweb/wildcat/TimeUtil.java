@@ -39,7 +39,7 @@ public class TimeUtil {
      * Formats a numeric timestamp into a textual representation.
      * 
      * @param timeStamp
-     * @return
+     * @return a string representation of the timestamp
      */
     public static String format(long timeStamp) {
         return FORMAT.format(new Date(timeStamp));
@@ -48,8 +48,8 @@ public class TimeUtil {
     /**
      * Parses a textual representation of a timestamp into a numeric timestamp.
      * 
-     * @param time
-     * @return
+     * @param date
+     * @return a numerical timestamp corresponding to the supplied date
      * @throws ParseException
      *             if the <code>time</code> parameter does not conform to the expected
      *             syntax (see <code>FORMAT</code>).

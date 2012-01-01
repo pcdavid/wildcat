@@ -19,6 +19,7 @@
  */
 package org.objectweb.wildcat.dependencies;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class DependencyGraphImpl<T> implements DependencyGraph<T> {
      * Creates a new, empty, dependency graph.
      */
     public DependencyGraphImpl() {
-        dependantsOn = Collections.synchronizedMap(new HashMap<T, Set<T>>());
+        dependantsOn = new HashMap<T, Set<T>>();
     }
 
     /*
@@ -99,7 +100,9 @@ public class DependencyGraphImpl<T> implements DependencyGraph<T> {
             if (deps == null) {
                 return Collections.emptySet();
             } else {
-                return Collections.unmodifiableCollection(deps);
+                Collection<T> result = new ArrayList<T>();
+                result.addAll(deps);
+                return Collections.unmodifiableCollection(result);
             }
         }
     }

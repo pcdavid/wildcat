@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Denotes location or a set of locations in a WildCAT context. The locations denoted
  * might or might not exist at a particular point in time. WildCAT paths are similar to
- * Unix paths, except that attributes (akin to file) are syntacticaly distinguished from
+ * Unix paths, except that attributes (akin to files) are syntacticaly distinguished from
  * resources (akin to directories). WildCAT also supports a (currently) limited form of
  * "glob matching" as found in Unix shells.
  * 
@@ -110,11 +110,13 @@ public interface Path {
     /**
      * Tests whether this path, which must be {@link #isDefinite() definite}, matches the
      * pattern of <code>p</code>. If <code>p</code> is also a definite path, this is
-     * equivalent to {@link #equals(Object)}. If <code>p</code> is a
-     * {@linkplain #isPattern() pattern} path, returns <code>true</code> iff TODO
+     * equivalent to {@link Object#equals(Object)}. If <code>p</code> is a
+     * {@linkplain #isPattern() pattern} path, returns <code>true</code> iff this path
+     * matches the pattern
      * 
      * @param p
-     * @return
+     *            a pattern path
+     * @return <code>true</code> iff this path patches the specified pattern.
      */
     boolean matches(Path p);
 
@@ -122,7 +124,7 @@ public interface Path {
      * Tests whether this path starts with the given prefix.
      * 
      * @param prefix
-     * @return
+     * @return <code>true</code> iff this path starts with the given suffix
      */
     boolean startsWith(Path prefix);
 
@@ -130,7 +132,7 @@ public interface Path {
      * Tests whether this path starts with the given prefix.
      * 
      * @param prefix
-     * @return
+     * @return <code>true</code> iff this path starts with the given suffix
      */
     boolean startsWith(String prefix) throws MalformedPathException;
 
@@ -138,7 +140,7 @@ public interface Path {
      * Tests whether this path ends with the given suffix.
      * 
      * @param suffix
-     * @return
+     * @return <code>true</code> iff this path ends with the given suffix
      */
     boolean endsWith(Path suffix);
 
@@ -146,7 +148,7 @@ public interface Path {
      * Tests whether this path ends with the given suffix.
      * 
      * @param suffix
-     * @return
+     * @return <code>true</code> iff this path ends with the given suffix
      */
     boolean endsWith(String suffix) throws MalformedPathException;
 
@@ -163,37 +165,96 @@ public interface Path {
     /**
      * Returns a new path denoting the parent(s) of this path.
      * 
-     * @return
+     * @return a new path denoting the parent(s) of this path.
      */
     Path getParent() throws MalformedPathException;
 
     /**
-     * Creates an return a new path by appending a suffix to this path.
+     * Creates an returns a new path by appending a suffix to this path.
      * 
      * @param suffix
-     * @return
+     *            a relative path to append to this path.
+     * @return a new path starting with this path and ending with the specified suffix.
      * @throws MalformedPathException
+     *             if the resulting path would be malformed.
      */
     Path append(Path suffix) throws MalformedPathException;
 
     /**
-     * Creates an return a new path by appending a suffix to this path.
+     * Convenience shortcut to {@link #append(Path)} using a string instead of an already
+     * parsed path.
      * 
-     * @param suffix
-     * @return
      * @throws MalformedPathException
+     *             if the resulting path would be malformed or if the specified suffix is
+     *             not a valid path specification.
      */
     Path append(String suffix) throws MalformedPathException;
 
+    /**
+     * Creates a new path by extending the receiver with an additional resource step.
+     * 
+     * @param name
+     *            the name of the resource step to append.
+     * @return a new path
+     * @throws MalformedPathException
+     *             if the receiver is an attribute path (and hence can not be extended) or
+     *             if the specified name if not a valid resource name or pattern.
+     */
     Path appendResource(String name) throws MalformedPathException;
 
+    /**
+     * Creates a new path by extending the receiver with an attribute step.
+     * 
+     * @param name
+     *            the name of the attribute to append.
+     * @return a new path
+     * @throws MalformedPathException
+     *             if the receiver is an attribute path (and hence can not be extended) or
+     *             if the specified name if not a valid attribute name or pattern.
+     */
     Path appendAttribute(String name) throws MalformedPathException;
 
+    /**
+     * Returns the suffix of this path beginning at the given index.
+     * 
+     * @param start
+     *            the index in this path where the subpath starts
+     * @return a new path
+     * @throws MalformedPathException
+     *             if <code>start</code> is not a valid index
+     */
     Path subPath(int start) throws MalformedPathException;
 
+    /**
+     * Returns a subpath of this path. The new path contains the parts of this path in the
+     * given index interval. Valid indices range from <code>0</code> to
+     * <code>#size() + 1</code>.
+     * 
+     * @param start
+     * @param finish
+     * @return a subath of this path
+     * @throws MalformedPathException
+     */
     Path subPath(int start, int finish) throws MalformedPathException;
 
+    /**
+     * Returns the size of this path, i.e. the number of steps it contains (including both
+     * resources and the optional attribute part).
+     * 
+     * @return the size of this path.
+     */
     int size();
 
-    Path relativeTo(Path path) throws MalformedPathException;
+    /**
+     * "Relativizes" this path with regard to a given base path. If this path starts with
+     * the base path, returns the suffix of this path excluding this base. Otherwise
+     * throws an exception.
+     * 
+     * @param base
+     *            the base path
+     * @return the suffix of this path excluding <code>base</code>.
+     * @throws MalformedPathException
+     *             if base is not a proper prefix of this path.
+     */
+    Path relativeTo(Path base) throws MalformedPathException;
 }

@@ -24,22 +24,32 @@ package org.objectweb.wildcat.expressions;
  */
 public class EvaluationException extends Exception {
     /**
+     * Creates a new <code>EvaluationException</code>.
+     * 
      * @param message
+     *            a message describing the error.
      */
     public EvaluationException(String message) {
         super(message);
     }
 
     /**
+     * Creates a new <code>EvaluationException</code>.
+     * 
      * @param cause
+     *            the root cause of the error.
      */
     public EvaluationException(Throwable cause) {
         super(cause);
     }
 
     /**
+     * Creates a new <code>EvaluationException</code>.
+     * 
      * @param message
+     *            a message describing the error.
      * @param cause
+     *            the root cause of the error.
      */
     public EvaluationException(String message, Throwable cause) {
         super(message, cause);

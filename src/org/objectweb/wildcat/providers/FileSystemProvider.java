@@ -32,6 +32,9 @@ import org.objectweb.wildcat.events.EventListener;
 import org.objectweb.wildcat.events.PathEvent;
 
 /**
+ * A provider to expose (part of) the filesystem inside a WildCAT context. Experitmental.
+ * Does not support event notification yet.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class FileSystemProvider implements ContextProvider {
@@ -52,15 +55,19 @@ public class FileSystemProvider implements ContextProvider {
     public FileSystemProvider(File rootFolder) {
         this.rootFolder = rootFolder;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#getDependencyGraph()
      */
     public DependencyGraph<Path> getDependencyGraph() {
         return dependencyGraph;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#setDependencyGraph(org.objectweb.wildcat.dependencies.DependencyGraph)
      */
     public void setDependencyGraph(DependencyGraph<Path> dg) {
@@ -84,9 +91,12 @@ public class FileSystemProvider implements ContextProvider {
     public Path getPath() {
         return path;
     }
-    
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path, org.objectweb.wildcat.events.PathEvent)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path,
+     *      org.objectweb.wildcat.events.PathEvent)
      */
     public void update(Path path, PathEvent cause) {
         // Ignore

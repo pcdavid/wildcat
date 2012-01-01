@@ -1,51 +1,30 @@
 package org.objectweb.wildcat.providers;
 
-import java.util.Collection;
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.objectweb.wildcat.Context;
-import org.objectweb.wildcat.ContextProvider;
 import org.objectweb.wildcat.Path;
-import org.objectweb.wildcat.dependencies.DependencyGraph;
-import org.objectweb.wildcat.events.EventListener;
-import org.objectweb.wildcat.events.PathEvent;
 import org.objectweb.wildcat.expressions.Interpreter;
 
 /**
- * Custom context provider used to monitor watched expressions.
+ * Custom context provider used to monitor watched expressions. Watched expressions are
+ * implemented as synthetic attributes with automatically generated names (<code>#expression_N</code>)
+ * on the top-level resource of an internal {@link DynamicContextProvider}.
  * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
-public class ExpressionsProvider implements ContextProvider {
-    /**
-     * The underlying context provider.
-     */
-    private DynamicContextProvider backend;
+public class ExpressionsProvider extends DynamicContextProvider {
     /**
      * The index used to generated synthetic attributes names.
      */
     private int expressionIndex = 0;
 
+    /**
+     * Creates a new <code>ExpressionsProvider</code>.
+     * 
+     * @param inter
+     *            the interpreter to use to evaluate expressions.
+     */
     public ExpressionsProvider(Interpreter inter) {
-        backend = new DynamicContextProvider(inter);
-    }
-
-    public ExpressionsProvider(ScheduledExecutorService scheduler, Interpreter inter) {
-        backend = new DynamicContextProvider(scheduler, inter);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#getDependencyGraph()
-     */
-    public DependencyGraph<Path> getDependencyGraph() {
-        return backend.getDependencyGraph();
-    }
-    
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#setDependencyGraph(org.objectweb.wildcat.dependencies.DependencyGraph)
-     */
-    public void setDependencyGraph(DependencyGraph<Path> dg) {
-        backend.setDependencyGraph(dg);
+        super(inter);
     }
 
     /**
@@ -56,16 +35,16 @@ public class ExpressionsProvider implements ContextProvider {
      * @return the full path of the created attribute.
      */
     public Path createExpressionAttribute(String expression) {
-        if (backend.getPath() == null) {
+        if (getPath() == null) {
             throw new IllegalStateException();
         }
         synchronized (this) {
             expressionIndex++;
         }
         Path path = Context.createPath("#expression_" + expressionIndex);
-        backend.createAttribute(path, null);
-        backend.setDefinition(path, expression);
-        return backend.getPath().append(path);
+        createAttribute(path, null);
+        setDefinition(path, expression);
+        return getPath().append(path);
     }
 
     /**
@@ -76,69 +55,6 @@ public class ExpressionsProvider implements ContextProvider {
      *            {@link #createExpressionAttribute(String)}).
      */
     public void deleteExpressionAttribute(Path path) {
-        backend.delete(path.relativeTo(backend.getPath()));
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#getPath()
-     */
-    public Path getPath() {
-        return backend.getPath();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#getEventListener()
-     */
-    public EventListener getEventListener() {
-        return backend.getEventListener();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#setEventListener(org.objectweb.wildcat.events.EventListener)
-     */
-    public void setEventListener(EventListener listener) {
-        backend.setEventListener(listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#lookup(org.objectweb.wildcat.Path)
-     */
-    public Collection<Path> lookup(Path query) {
-        return backend.lookup(query);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#lookupAttribute(org.objectweb.wildcat.Path)
-     */
-    public Object lookupAttribute(Path attribute) {
-        return backend.lookupAttribute(attribute);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#mounted(org.objectweb.wildcat.Path)
-     */
-    public void mounted(Path path) {
-        backend.mounted(path);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#unmounted()
-     */
-    public void unmounted() {
-        backend.unmounted();
-    }
-    
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.dependencies.Updatable#update(org.objectweb.wildcat.Path, org.objectweb.wildcat.events.PathEvent)
-     */
-    public void update(Path path, PathEvent cause) {
-        backend.update(path, cause);
+        super.delete(path.relativeTo(getPath()));
     }
 }

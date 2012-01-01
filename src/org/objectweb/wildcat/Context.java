@@ -32,7 +32,11 @@ import org.objectweb.wildcat.providers.ExpressionsProvider;
 import org.objectweb.wildcat.providers.OverlayContextProvider;
 
 /**
- * This class is the main façade used by clients to interact with WildCAT.
+ * This class is the main façade used by clients to interact with WildCAT. It offers both
+ * pull and push interfaces for query the context and be notified when specific conditions
+ * orccur. It also offers a simple configuration interface by allowing the
+ * mounting/unmounting of specific providers in the context hierarchy. Each particular
+ * provider offers its own way to be configured.
  * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
@@ -106,6 +110,7 @@ public class Context {
         dependencyManager = new DependencyManager(root);
         startDaemon("Dependency Manager", dependencyManager);
         eventMuxer.addListener(dependencyManager);
+        root.setDependencyGraph(dependencyManager);
         root.mounted(getRootPath());
 
         expressionsProvider = new ExpressionsProvider(interpreter);
@@ -125,8 +130,17 @@ public class Context {
         th.start();
     }
 
+    /**
+     * Creates a new {@link DynamicContextProvider} configured to use the default
+     * interpreter to evaluate its synthetic attributes.
+     * 
+     * @return a new {@link DynamicContextProvider}
+     */
     public DynamicContextProvider createDynamicContextProvider() {
-        return new DynamicContextProvider(interpreter);
+        DynamicContextProvider dcp = new DynamicContextProvider(interpreter);
+        dcp.setDependencyGraph(dependencyManager);
+        dcp.setEventListener(eventMuxer);
+        return dcp;
     }
 
     /**
@@ -255,10 +269,18 @@ public class Context {
     }
 
     /**
+     * Registers a listener for a specific set of events.
+     * 
      * @param evtKinds
+     *            a set of {@link EventKind}s indicating what kinds of events the
+     *            listener should be notified of.
      * @param path
+     *            a path, possibly a pattern, indicating at which locations these kinds of
+     *            events should be monitored.
      * @param listener
-     * @return
+     *            the listener which will be notified when a matching event occurs.
+     * @return an opaque identifier (cookie) representing this registration, which can be
+     *         used to disable it later
      */
     public Object register(EnumSet<EventKind> evtKinds, Path path,
             ContextListener listener) {
@@ -276,10 +298,19 @@ public class Context {
     }
 
     /**
+     * Registers a listener to watch for changes in an expression over the context.
+     * 
      * @param evtKinds
+     *            a set of {@link EventKind}s indicating what kinds of events the
+     *            listener should be notified of. This can be either
+     *            {@link EventKind#EXPRESSION_CHANGED EXPRESSION_CHANGED} or
+     *            {@link EventKind#CONDITION_OCCURED CONDITION_OCCURED}, or both.
      * @param expression
+     *            the expression to watch
      * @param listener
-     * @return
+     *            the listener which will be notified when a matching event occurs.
+     * @return an opaque identifier (cookie) representing this registration, which can be
+     *         used to disable it later
      */
     public Object registerExpression(EnumSet<EventKind> evtKinds, String expression,
             ContextListener listener) {
@@ -288,7 +319,10 @@ public class Context {
     }
 
     /**
+     * Cancels a registration.
+     * 
      * @param cookie
+     *            the opaque identifier returned when the registration to cancel was made.
      */
     public void unregister(Object cookie) {
         Path path = subscriptionsManager.unregister(cookie);

@@ -20,6 +20,10 @@
 package org.objectweb.wildcat;
 
 /**
+ * A <code>ContextProviderContainer</code> extends a plain {@link ContextProvider} with
+ * support for mounting and unmounting "sub-providers" at specific points in its resource
+ * tree.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public interface ContextProviderContainer extends ContextProvider {

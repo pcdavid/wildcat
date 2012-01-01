@@ -79,10 +79,18 @@ public class OverlayContextProvider extends EventForwarder implements
         this.mounted = false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.objectweb.wildcat.ContextProvider#setEventListener(org.objectweb.wildcat.events.EventListener)
+     */
     public void setEventListener(EventListener listener) {
         this.listener = listener;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.objectweb.wildcat.ContextProvider#getEventListener()
+     */
     public EventListener getEventListener() {
         return this.listener;
     }

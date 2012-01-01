@@ -23,25 +23,31 @@ import org.objectweb.wildcat.expressions.Environment;
 import org.objectweb.wildcat.expressions.EvaluationException;
 
 /**
+ * Implements the boolean negation function.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
- *
  */
 public class NotFunction implements Function {
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.expressions.Function#getName()
      */
     public String getName() {
         return "not";
     }
 
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.expressions.Function#apply(java.lang.Object[], org.objectweb.wildcat.expressions.Environment)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.expressions.Function#apply(java.lang.Object[],
+     *      org.objectweb.wildcat.expressions.Environment)
      */
     public Object apply(Object[] args, Environment env) throws EvaluationException {
         if (args.length != 1) {
             throw new EvaluationException(getName() + "() requires exactly one argument.");
         }
-        if (! (args[0] instanceof Boolean)) {
+        if (!(args[0] instanceof Boolean)) {
             throw new EvaluationException(getName() + "() requires a boolean argument.");
         }
         Boolean b = (Boolean) args[0];

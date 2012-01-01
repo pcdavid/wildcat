@@ -37,7 +37,7 @@ import org.objectweb.wildcat.events.PathRemovedEvent;
 /**
  * This class implements the notion of {@link ContextProvider} using a simple in-memory
  * data-structure to represent the tree of resources and attributes. It essentially wraps
- * a top-level {@link Resource resource} and provides the high-level
+ * a top-level {@link Resource} and provides the high-level
  * {@link ContextProvider ContextProvider} APIs on it.
  * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
@@ -47,27 +47,41 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
      * The top-level resource.
      */
     protected Resource content;
-    
+
     protected DependencyGraph<Path> dependencyGraph;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#getDependencyGraph()
      */
     public DependencyGraph<Path> getDependencyGraph() {
         return dependencyGraph;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.objectweb.wildcat.ContextProvider#setDependencyGraph(org.objectweb.wildcat.dependencies.DependencyGraph)
      */
     public void setDependencyGraph(DependencyGraph<Path> dg) {
         this.dependencyGraph = dg;
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.ContextProvider#setEventListener(org.objectweb.wildcat.events.EventListener)
+     */
     public void setEventListener(EventListener listener) {
         this.listener = listener;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.ContextProvider#getEventListener()
+     */
     public EventListener getEventListener() {
         return this.listener;
     }
@@ -113,14 +127,23 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
         content = null;
         notify(new PathRemovedEvent(p));
     }
-    
-    /* (non-Javadoc)
-     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path, org.objectweb.wildcat.events.PathEvent)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.ContextProvider#update(org.objectweb.wildcat.Path,
+     *      org.objectweb.wildcat.events.PathEvent)
      */
     public void update(Path path, PathEvent cause) {
         // Ignore
     }
-    
+
+    /**
+     * Convenience shortcut for {@link #createResource(Path)} using a string insterad of a
+     * preparsed {@link Path}.
+     * 
+     * @param res the location of the resource to create.
+     */
     public void createResource(String res) {
         createResource(Context.createPath(res));
     }
@@ -129,6 +152,7 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
      * Creates a new resource.
      * 
      * @param res
+     *            the location of the new resource.
      */
     public void createResource(Path res) {
         if (res.isPattern()) {
@@ -142,7 +166,16 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
         }
         findResource(res, true);
     }
-    
+
+    /**
+     * Convenience shortcut for {@link #createAttribute(Path, Object)} using a string
+     * instead of a preparsed {@link Path}.
+     * 
+     * @param attr
+     *            the location of the attribute to create.
+     * @param initialValue
+     *            the initial value of the attribute.
+     */
     public void createAttribute(String attr, Object initialValue) {
         createAttribute(Context.createPath(attr), initialValue);
     }
@@ -151,7 +184,9 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
      * Creates a new attribute.
      * 
      * @param attr
+     *            the location of the attribute to create.
      * @param initialValue
+     *            the initial value of the attribute.
      */
     public void createAttribute(Path attr, Object initialValue) {
         if (attr.isPattern()) {
@@ -169,7 +204,16 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
                     + " is not a valid location for a new attribute.");
         }
     }
-    
+
+    /**
+     * Convenience shortcut for {@link #setValue(Path, Object)} using a string instead of
+     * a preparsed {@link Path}.
+     * 
+     * @param attr
+     *            the attribute to change.
+     * @param value
+     *            the new value to set.
+     */
     public void setValue(String attr, Object value) {
         setValue(Context.createPath(attr), value);
     }
@@ -178,7 +222,9 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
      * Sets the value of an attribute.
      * 
      * @param attr
+     *            the attribute to change
      * @param value
+     *            the new value to set
      */
     public void setValue(Path attr, Object value) {
         if (attr.isResource()) {
@@ -195,7 +241,14 @@ public class BasicContextProvider extends EventForwarder implements ContextProvi
             throw new IllegalArgumentException("No such attribute.");
         }
     }
-    
+
+    /**
+     * Convenience shortcut for {@link #delete(Path)} using a string instead of a
+     * preparsed {@link Path}.
+     * 
+     * @param location
+     *            the location to delete.
+     */
     public void delete(String location) {
         delete(Context.createPath(location));
     }

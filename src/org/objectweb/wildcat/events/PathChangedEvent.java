@@ -38,7 +38,7 @@ public class PathChangedEvent extends PathEvent {
     private Object newValue;
 
     /**
-     * Creates a new <code>PathChangedEvent</code>.
+     * Creates a new <code>PathChangedEvent</code> for the given location and values.
      * 
      * @param path
      *            the path denoting the attribute which changed.
@@ -51,13 +51,25 @@ public class PathChangedEvent extends PathEvent {
      */
     public PathChangedEvent(Path path, Object oldValue, Object newValue, long timeStamp) {
         super(path, timeStamp);
-        if (! path.isAttribute()) {
-            throw new IllegalArgumentException("Path-changed events can only occur for attributes.");
+        if (!path.isAttribute()) {
+            throw new IllegalArgumentException(
+                    "Path-changed events can only occur for attributes.");
         }
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-    
+
+    /**
+     * Creates a new <code>PathChangedEvent</code> for the given location and values.
+     * The default timestamp denotes the time of creation of the event.
+     * 
+     * @param path
+     *            a path denoting the new element
+     * @param oldValue
+     *            the previous value of the attribute, before the change.
+     * @param newValue
+     *            the new value of the attribute, after the change.
+     */
     public PathChangedEvent(Path path, Object oldValue, Object newValue) {
         this(path, oldValue, newValue, TimeUtil.now());
     }

@@ -40,6 +40,7 @@ public interface Expression {
     Object evaluate(Environment env) throws EvaluationException;
     
     /**
+     * Accepts the supplied visitor.
      * 
      * @param visitor
      */

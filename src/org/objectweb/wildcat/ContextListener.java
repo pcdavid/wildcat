@@ -101,7 +101,7 @@ public interface ContextListener {
 	 * Indicates that a condition occurred, i.e. a monitored boolean
 	 * expression's value changed from <code>false</code> to <code>true</code>.
 	 * 
-	 * @param cookier
+	 * @param cookie
 	 *            the registration identifier ("cookie") corresponding to the
 	 *            monitored expression.
 	 * @param timeStamp

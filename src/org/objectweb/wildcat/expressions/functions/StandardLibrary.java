@@ -22,14 +22,20 @@ package org.objectweb.wildcat.expressions.functions;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 /**
+ * Provides the default set of functions to the interpreter.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
- *
  */
 public class StandardLibrary implements FunctionsLibrary {
+    /**
+     * The functions provided by this library.
+     */
     private Collection<Function> functions;
-    
+   
+    /**
+     * Creates and populates the standard library.
+     */
     public StandardLibrary() {
         functions = new ArrayList<Function>();
         functions.add(new AddFunction());

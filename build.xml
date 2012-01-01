@@ -10,12 +10,15 @@
     <property file="build.properties" />
     <property name="src" value="${basedir}/src" />
     <property name="sensors" value="${basedir}/sensors" />
+    <property name="examples" value="${basedir}/examples/src" />
     <property name="tests" value="${basedir}/tests" />
     <property name="externals" value="${basedir}/externals" />
     <!-- Outputs -->
     <property name="out" value="${basedir}/output" />
     <property name="out.build" value="${out}/build" />
     <property name="out.tests" value="${out}/tests" />
+    <property name="out.examples" value="${out}/examples" />
+    <property name="out.javadoc" value="${out}/javadoc" />
     <property name="out.dist" value="${out}/dist" />
     <property name="out.dist.lib" value="${out.dist}/lib" />
     <property name="out.dist.doc" value="${out.dist}/doc" />
@@ -36,6 +39,7 @@
     <path id="run.classpath" description="Libraries required to run the product.">
         <path refid="compile.classpath" />
         <pathelement location="${out.build}" />
+        <pathelement location="${out.examples}" />
     </path>
 
     <path id="tests.classpath" description="Libraries required to test the product.">
@@ -62,7 +66,7 @@
 
     <target name="compile"
             depends="antlr.generate"
-            description="Compiles code, class files go to the ${build.dir} directory.">
+            description="Compiles code, class files go to the ${out.build} directory.">
         <mkdir dir="${out.build}" />
         <javac destdir="${out.build}" source="1.5" target="1.5">
             <classpath refid="compile.classpath" />
@@ -80,6 +84,28 @@
                 <exclude name="**/*TokenTypes.txt" />
             </fileset>
             <fileset dir="${sensors}" excludes="**/*.java" />
+        </copy>
+    </target>
+
+    <target name="examples.compile"
+            depends="compile"
+            description="Compiles example programs.">
+        <mkdir dir="${out.examples}" />
+        <javac destdir="${out.examples}" source="1.5" target="1.5">
+            <classpath>
+                <path refid="compile.classpath" />
+                <pathelement location="${out.build}"/>
+                <pathelement location="${externals}/jline-0.9.91-SNAPSHOT.jar"/>
+            </classpath>
+            <src path="${examples}" />
+            <include name="**/*.java" />
+        </javac>
+        <!-- Copy resources. -->
+        <copy todir="${out.examples}">
+            <fileset dir="${examples}">
+                <exclude name="**/*.java" />
+                <exclude name=".cvsignore" />
+            </fileset>
         </copy>
     </target>
 
@@ -103,6 +129,30 @@
     </target>
 
     <target name="test" depends="junit.check,tests.compile" description="Runs unit tests.">
+        <!-- Ant 1.6.5 does not support JUnit 4. Call JUnit directly as a workaround for now. -->
+        <java classpathref="tests.classpath" classname="org.junit.runner.JUnitCore" fork="yes">
+            <jvmarg value="-ea"/>
+            <arg value="org.objectweb.wildcat.PathTests"/>
+            <arg value="org.objectweb.wildcat.dependencies.DependencyGraphTests" />
+            <arg value="org.objectweb.wildcat.expressions.AndExpressionTests" />
+            <arg value="org.objectweb.wildcat.expressions.CallExpressionTests" />
+            <arg value="org.objectweb.wildcat.expressions.ConstantExpressionTests" />
+            <arg value="org.objectweb.wildcat.expressions.EnvironmentTests" />
+            <arg value="org.objectweb.wildcat.expressions.ExpressionsLanguageTests" />
+            <arg value="org.objectweb.wildcat.expressions.OrExpressionTests" />
+            <arg value="org.objectweb.wildcat.expressions.VariableExpressionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.AddFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.DivideFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.EqualsFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.LessThanFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.MultiplyFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.NotFunctionTests" />
+            <arg value="org.objectweb.wildcat.expressions.functions.SubstractFunctionTests" />
+            <arg value="org.objectweb.wildcat.providers.BasicContextProviderTests" />
+            <arg value="org.objectweb.wildcat.providers.OverlayContextProviderTests" />
+            <arg value="org.objectweb.wildcat.providers.ResourceTests" />
+        </java>
+        <!--
         <junit haltonfailure="true">
             <classpath refid="tests.classpath" />
             <formatter type="brief" usefile="false" />
@@ -110,29 +160,39 @@
                 <fileset dir="${out.tests}" includes="**/*Tests.class" />
             </batchtest>
         </junit>
+        -->
     </target>
 
-    <target name="dist" depends="test" description="Prepares the product's distribution.">
+    <target name="dist" depends="test,javadoc" description="Prepares the product's distribution.">
         <mkdir dir="${out.dist}" />
         <mkdir dir="${out.dist.lib}" />
-        <jar destfile="${out.dist.lib}/${product.name}.jar" basedir="${out.build}" />
-        <copy todir="${out.dist.lib}">
-            <fileset dir="${basedir}/lib">
-                <include name="*" />
-            </fileset>
-        </copy>
+        <jar destfile="${out.dist.lib}/${product.name}-${product.version}.jar" basedir="${out.build}" />
         <mkdir dir="${out.dist.externals}" />
-        <copy todir="${out.dist.externals}">
-            <fileset dir="${externals}">
-                <include name="*.jar" />
-            </fileset>
-        </copy>
+        <copy todir="${out.dist.externals}" file="${antlr.jar}" />
         <copy todir="${out.dist}">
             <fileset dir="${basedir}">
                 <include name="README" />
                 <include name="LICENSE" />
+                <include name="doc/*" />
             </fileset>
         </copy>
+        <copy todir="${out.dist}/doc/javadoc">
+            <fileset dir="${out.javadoc}">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="javadoc" description="Creates Javadoc API documentation.">
+        <javadoc classpathref="run.classpath" destdir="${out.javadoc}" doctitle="WildCAT">
+            <sourcepath location="${src}" />
+            <package name="org.objectweb.wildcat"/>
+            <package name="org.objectweb.wildcat.dependencies"/>
+            <package name="org.objectweb.wildcat.events"/>
+            <package name="org.objectweb.wildcat.expressions"/>
+            <package name="org.objectweb.wildcat.expressions.functions"/>
+            <package name="org.objectweb.wildcat.providers"/>
+        </javadoc>
     </target>
 
     <target name="package"

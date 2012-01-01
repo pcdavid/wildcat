@@ -28,20 +28,39 @@ import antlr.RecognitionException;
 import antlr.TokenStreamException;
 
 /**
+ * Default implementation of the {@link Interpreter} interface.
+ * 
  * @author Pierre-Charles David <pcdavid@gmail.com>
  */
 public class BasicInterpreter implements Interpreter {
+    /**
+     * The top-level environment containing functions definitions and global variables.
+     */
     private Environment topLevel = new Environment();
 
+    /**
+     * Creates a new interpreter with the default library of functions.
+     */
     public BasicInterpreter() {
         this(new StandardLibrary());
     }
 
+    /**
+     * Creates a new interpreter with a specific library of functions pre-loaded.
+     * 
+     * @param library
+     *            the library of functions to load.
+     */
     public BasicInterpreter(FunctionsLibrary library) {
         this.topLevel = new Environment();
         this.topLevel.load(library);
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.objectweb.wildcat.expressions.Interpreter#getEnvironment()
+     */
     public Environment getEnvironment() {
         return topLevel;
     }

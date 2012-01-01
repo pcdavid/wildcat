@@ -1,611 +1,420 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>WildCAT: a toolkit for context-aware applications</title>
+    <title>WildCAT: a framework for context-aware applications</title>
     <meta name="dc.title" content="WildCAT: a toolkit for context-aware applications" />
-    <meta name="dc.creator" content="Pierre-Charles David (pierre-charles.david@wanadoo.fr)" />
+    <meta name="dc.creator" content="Pierre-Charles David (pcdavid@gmail.com)" />
     <meta name="dc.publisher" content="OBASCO Research Group (http://www.emn.fr/x-info/obasco)" />
     <meta name="dc.language" content="en" />
-    <meta name="dc.date" content="2005-07-25" />
-    <meta name="dc.keywords" content="self-adaptive systems, context-aware systems, wildcat" />
+    <meta name="dc.date" content="2006-12-12" />
+    <meta name="dc.keywords" content="monitoring, middleware, java, context-awareness, wildcat" />
     
-    <style type="text/css">
-      body { background: #F0F0F0 }
-      .abstract {
-        background-color: rgb(200, 200, 220);
-        border-style: dashed;
-        border-width: thin;
-        padding: 0.7em;
-      }
-      .comment {
-        color: rgb(230, 30, 30);
-        font-style: italic;
-      }
-      .keyword {
-        color: blue;
-      }
-      .function, .action {
-        color: green;
-      }
-      .axis {
-        color: blue;
-      }
-      .action {
-        font-weight: bold;
-      }
-      .parameter {
-        font-style: italic;
-      }
-      .optional {
-        font-style: italic;
-      }
-      .constant {
-        font-weight: bold;
-      }
-      pre {
-        background-color: rgb(190, 190, 200);
-	border: thin black dashed;
-        padding: 0.7em;
-      }
-    </style>
   </head>
   <body>
-    <h1 id="wildcat">WildCAT: a toolkit for context-aware applications</h1>
+    <h1 id="wildcat">WildCAT: a framework for context-aware applications</h1>
+
+    <ol>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#model">The data model</a></li>
+      <li><a href="#api">User-level APIs</a></li>
+      <li><a href="#config">Configuration</a></li>
+      <li><a href="#extension">Extension: writing adapters and providers</a></li>
+    </ol>
+
+    <h2 id="intro">Introduction</h2>
 
     <p>WildCAT is a Java toolkit/framework which can be used to build
-    context-aware applications, of which self-adaptive applications are a
-    special case. From the client applications point of view, it provides a
-    simple and dynamic data-model to represent the execution context of the
-    application, and offers a simple API for the programmers to access this
-    information both synchronously and synchronously (<i>pull</i> and
-    <i>push</i>). Internally, it is a framework designed to facilitate the
-    acquisition and aggregation of contextual data and to create reusable
-    ontologies to represent aspects of the execution context relevant to many
-    applications. It is described in more details (but in french), in Chapter 5
-    of P.-C. David's <a
-    href="http://pcdavid.net/research/papers/david_phd2005.pdf">PhD
-    Thesis</a></p>
+      context-aware applications. From the client applications point
+      of view, it provides a simple and dynamic data model to
+      represent the execution context of the application, and offers a
+      simple API for the programmers to access this information both
+      synchronously and synchronously (<i>pull</i> and <i>push</i>).
+      Internally, it is a framework designed to facilitate the
+      aggregation of contextual data by integrating existing
+      monitoring technologies into a single common model.</p>
 
-    <h2>WildCAT's data model</h2>
+    <p>Numerous monitoring solutions already exist in many domains
+      (network and grid, performance, application-level, environment,
+      etc.). Each represent real expertise in a specialized domain,
+      but these solutions can not be easily combined to provide an
+      overall picture, as they are generally ad hoc and heterogeneous.
+      Building context-aware applications and autonomic control loops
+      requires a systemic view of the target application and its
+      environment, which covers domains currently targeted by
+      different solutions. In order to build such a systemic view
+      without re-implementing already existing solutions, one must be
+      able to integrate to (called "providers" from now on) in a
+      uniform way. In a sense, what is needed is a <em>monitoring
+      middleware</em>, able to provide a uniform -- and hopefuly
+      simple -- interface to a set of heterogeneous monitoring
+      solutions.</p>
 
-    <p style="float: right">
-      <img alt="WildCAT data model" src="wildcat-model.png" />
+    <p>WildCAT provides such a middleware platform, and is built
+      around the following requirements:
+     <ul>
+       <li>First, WildCAT provides a <em>common</em>, <em>generic</em>
+	 and <em>flexible</em> data model to represent the monitoring
+	 data from all the providers in a single, uniform way to the
+	 end user.</li>
+       <li>This model is made accessible to client users through an
+	 API which supports two modes: a <em>pull mode</em>, where the
+	 user queries the middleware to know the current structure and
+	 state of the model; and a <em>push mode</em> where the user
+	 can ask to be notified automatically and asynchronously of
+	 specific conditions occurring in the model. This API is
+	 designed to be easy to learn and to use, and to isolate the
+	 programmer from the actual implementation details.</li>
+       <li>The internal configuration of the middleware, which
+	 determines how the different data sources
+	 (<em>providers</em>) are configured and integrated, is
+	 entirely dynamic and programmable.</li>
+       <li>WildCAT tries to impose as little overhead (both
+	 in memory and CPU) in the use of the integration
+	 framework/middleware compared to a "native" usage of the
+	 providers.</li>
+     </ul>
     </p>
 
-    <p>The figure on the right represents the logical model use by WildCAT to
-    represent the execution context. Note that this UML diagram does not imply
-    anything about the actual implementation, except for the
-    <code>Context</code> class, which serves as a <a
-    href="http://c2.com/cgi/wiki?FacadePattern">façade</a> for the whole system
-    from the clients' point of view.</p>
+    <p>WildCAT is designed to take different kinds of users into account,
+      each of which has particular needs which influence the system's
+      design:
+      <ul>
+	<li>The client user is an <em>application programmer</em> who
+	  wants to make his application context-aware (whether this
+	  awareness is hard-coded or managed by an autonomic feedback
+	  loop). To this user, WildCAT consists in a simple,
+	  hierarchic and dynamic data model which represents his/her
+	  application's context, and an easy to use API to access this
+	  model.</li>
+	<li>The second type of WildCAT user is
+	  the <em>configurator</em>, who, given the information
+	  required by the application programmer, identifies the data
+	  sources which can give access to these information, and
+	  organises them into a consistent WildCAT data model. The
+	  tools available to the configurator include a generic and
+	  configurable implementation of the data model, in which
+	  attributes values can be provided directly by external
+	  sensors (for example LeWYS probes) and are updated at
+	  regular (configurable) intervals. This implementation also
+	  supports the notion of synthetic attributes whose value is
+	  defined in terms of other attributes in the context and are
+	  updated automatically when their dependencies change.</li>
+	<li>Finally, the last type of user is the <em>developer</em>
+	  who extends the framework itself, by creating adapters for
+	  new kinds of data sources (either primitive sensors of
+	  structured sources), or by providing tools to help the
+	  configurator in his job of modelling the context and
+	  integrating heterogeneous sources (for example configuration
+	  languages or GUI tools).</li>
+      </ul>
+    </p>
 
-    <p>The main class is called <code>Context</code>. It is a singleton; only
-    one instance exists in each application, representing the whole context of
-    the application. It provides the interfaces used by clients (see next
-    section).</p>
+    <h2 id="model">The data model</h2>
 
-    <p>The context is made of several <em>domains</em>, each represented by a
-    <code>ContextDomain</code> object and identified by a unique name. The
-    purpose of context domains is to separate the different <em>aspects</em> of
-    the execution context, and to allow each of these to use a custom
-    implementation, be it for performance reason or for interoperability with
-    existing systems. Examples of context domains include (but are not limited
-    to):</p>
-    <ul>
-      <li><code>sys</code>: local hardware resources (memory, disks, IO
-      devices...).</li>
-      <li><code>net</code>: the topology and performance of the
-      network.</li>
-      <li><code>soft</code>: software resources available (shared libraries,
-      programs, resource files...).</li>
-      <li><code>file</code>: the local filesystem.</li>
-      <li><code>geo</code>: geophysical informations (logical and physical
-      location, room temperature...).</li>
-      <li><code>user</code>: user preferences, characteristics (disabilities...)
-      and current state (activity, mood...).</li>
-      <li>...</li>
-    </ul>
+    <p>WildCAT represents the execution context using a purposedly
+      simple data model consisting in a tree of <em>resources</em>,
+      each described by a set of <em>attributes</em>. The top-level,
+      root resource is anonymous and can contain only sub-resources
+      (no attributes). Every other resource is identified by a name,
+      unique among all the sub-resources of a given parent resource,
+      and can contain sub-resources and attributes. Attributes are
+      named values attached to a resource they describe, and as for
+      resources their names is unique among siblings. However,
+      resources and attributes names are in different namespaces, so
+      it is possible for a resource to have both a sub-resource and an
+      attribute with the same name.</p>
 
-    <p>Note that WildCAT does not actually implement any of those, but provides
-    a framework in which these heterogeneous informations can be integrated and
-    accessed through a common interface. Because lots of context information is
-    common to many applications, WildCAT is designed so that context domains
-    modelisation (ontologies) and implementation (data acquisition) can be
-    shared and reused like software libraries.</p>
+    <p>This model does not impose any particular semantics on the
+      structure of resources and attributes. Depending on how the
+      model is used, "r2 is a sub-resource of r1" can mean "r2 depends
+      on r1", "r2 is a part of r1", "r2 is an aspect of r1", etc.
+      WildCAT only provides a base mechanism, and does not impose a
+      particular policy on how it should be used. For example, most
+      applications map attributes to properties of the corresponding
+      resource. This works if properties are atomic, but if one wants
+      a more sophisticated modeling of properties (including for
+      example the unit of measure, its precision, etc.), one would
+      model properties as resources with different attributes for
+      different aspects of the properties.</p>
 
-    <p>Finally, each context domain is model as a tree of named
-    <em>resources</em>, each being described by <em>attributes</em> (simple
-    <i>key, value</i> pairs). This simple model was chosen because of its
-    generality, familiarity and because it does not impose a complex
-    implementation. Note that this is a <em>logical</em> model, as seen by
-    clients. An actual implementation of a context domain can use a more complex
-    model internally (for example with sharing of resources, resulting in a
-    DAG), as long as it provides a tree-like interface.</p>
+    <p>WildCAT uses a syntax inspired by Unix file names to denote 
+      elements in the context while being indenpendent on the actual
+      implementation. A <em>path</em> can denote either a resource, an
+      attribute, or a set of resources or attributes matching a
+      particular pattern.</p>
 
-    <h2>Events</h2>
-
-    <p>Of course, since the context being modeled is highly dynamic, so is
-    WildCAT's data model. Each change occuring in the context model is
-    represented by an event. The possible kinds of events are:</p>
-    <ul>
-      <li><code class="constant">RESOURCE_ADDED</code> and <code
-      class="constant">RESOURCE_REMOVED</code>, fired when resources appear or
-      disappear in the context.</li>
-      <li><code class="constant">ATTRIBUTE_ADDED</code> and <code
-      class="constant">ATTRIBUTE_REMOVED</code>, fired when attributes appear or
-      disappear in a resource.</li>
-      <li><code class="constant">ATTRIBUTE_CHANGED</code>, fired when the value
-      of an attribute changes.</li>
-      <li><code class="constant">EXPRESSION_CHANGED</code>, fired when the value
-      of a synthetic expression on the context changes (see below).</li>
-      <li><code class="constant">CONDITION_OCCURED</code>, fired when a boolean
-      synthetic expression becomes true, as a special case of <code
-      class="constant">EXPRESSION_CHANGED</code> (see below).</li>
-    </ul>
-
-    <h2>Adressing</h2>
-
-    <p>WildCAT uses a syntax inspired by URIs to denote an element in the
-    context while being indenpendent on the actual implementation. A
-    <em>path</em> can denote either a resource, an attribute, or all the
-    sub-resources or sub-attributes of a resource.</p>
-
-    <pre>sys://storage/memory              <span class="comment">// A specific resource</span>
-sys://storage/disks/hda#removable <span class="comment">// A specific attribute</span>
-sys://devices/input/*             <span class="comment">// All the (direct) sub-resources of input</span>
-sys://devices/input/mouse#*       <span class="comment">// All the attributes of mouse</span></pre>
-
-    <p>Note that a path can be syntactically valid but denote a place which does
-    not exist.</p>
-
-    <p>Paths are represented by instances of the <code>Path</code> class, which
-    can be created this way:</p>
-
-    <pre>Path p = <span class="keyword">new</span> Path("sys://storage/disks/hda#removable");</pre>
-
-    <h2>External APIs</h2>
-
-    <p>The <code>Context</code> class offers two complementary interfaces to
-    access the actual contextual data of an application.</p>
-
-    <h3>Sychronous requests (<em>pull</em> mode)</h3>
-
-    <p>The first one allow clients to discover the structure of the context and
-    to request the immediate value of an attribute. The methods in
-    <code>Context</code> corresponding to this interface are:</p>
-
-    <pre><span class="keyword">public class</span> Context {
-    <span class="comment">// Discovery and synchronous requests</span>
-    <span class="keyword">public</span> String[] getDomains() { ... }
-    <span class="keyword">public</span> Path[] getChildren(Path res) { ... }
-    <span class="keyword">public</span> Path[] getAttributes(Path res) { ... }
-    <span class="keyword">public</span> boolean exists(Path path) { ... }
-    <span class="keyword">public</span> Object resolve(Path attr) { ... }
-    ...
-}</pre>
-
-    <p>The <code>get*</code> methods can be used to discover the current
-    structure of the context, as known by WildCAT. <code>exists()</code> tests
-    whether the element(s) denoted by its argument path actually exist at this
-    time in the context. Finally, <code>resolve()</code> returns the value of
-    the single attribute denoted by its argument. For example,</p>
-    <pre>Path[] drives = context.getChildren(<span class="keyword">new</span> Path("sys://storage/disks"));</pre>
-    <p>returns the list of all disk drives currently known to WildCAT, while</p>
-    <pre>Number n = (Number) context.resolve(<span class="keyword">new</span> Path("sys://storage/memory#free"));</pre>
-    <p>returns the amount of memory currently available.</p>
-
-    <h3>Asynchronous notifications (<em>push</em> mode)</h3>
-
-    <p>The second interface provided by <code>Context</code> follow the
-    publish/subscribe pattern. The client first registers its interest in a kind
-    of event, and from this point on, WildCAT will send it asynchronous
-    notifications each time this kind of event occurs. The methods in
-    <code>Code</code> corresponding to this interface are:</p>
+    <pre>
+      /sys/storage/memory              // A specific resource
+      /sys/storage/disks/hda#removable // A specific attribute
+      /sys/devices/input/*             // All the (direct) sub-resources of input
+      /sys/devices/input/mouse#*       // All the attributes of mouse
+      /cluster/nodes/*/load#cpu        // The processing loads of all the nodes in a cluster
+    </pre>
     
-    <pre><span class="keyword">public class</span> Context {
-    ...
-    <span class="comment">// Asynchronous notifications (publish / subscribe)</span>
-    <span class="keyword">public</span> long register(ContextListener listener, int eventKinds, Path path) { ... }
-    <span class="keyword">public</span> long registerExpression(ContextListener listener, int eventKinds, String expr) { ... }
-    <span class="keyword">public</span> void unregister(long regId) { ... }
-}</pre>
+    <p>Note that a path can be syntactically valid but denote a
+      location which does not exist.</p>
 
-    <p>The first method, <code>register()</code> takes a listener object (which
-    will receive the event notifications), a bitmask representing the kinds of
-    events the client is interested in (using constants defined in the
-    <code>EventKinds</code> interface), and finally the path on which the events
-    must be detected (this path can include a wildcard as its last element). For
-    exemple, to get notified each time a new input device is plugged <em>or</em>
-    unplugged:</p>
+    <p>Of course, since the context being modeled is highly dynamic,
+      so is WildCAT's data model. Each change occuring in the context
+      model is represented by an event, which can be observed (other
+      kinds of events can also be observed, but they do not strictly
+      correspond to primitive changes in the model). The possible
+      kinds of events are:
+      <ul>
+	<li><code>RESOURCE_ADDED</code>
+	  and <code>RESOURCE_REMOVED</code>, fired when resources
+	  appear or disappear in the context.</li>
 
-    <pre>context.register(myListener, EventKinds.RESOURCE_ADDED | EventKinds.RESOURCE_REMOVED,
-                 <span class="keyword">new</span> Path("sys://devices/input/*"));</pre>
+	<li><code>ATTRIBUTE_ADDED</code>
+	  and <code>ATTRIBUTE_REMOVED</code>, fired when attributes
+	  appear or disappear in a resource.</li>
 
-    <p>Where <code>myListener</code> implements the <code>ContextListener</code> interface:</p>
+	<li><code>ATTRIBUTE_CHANGED</code>, fired when the value
+	  of an attribute changes.</li>
+      </ul>
+    </p>
 
-    <pre><span class="keyword">public interface</span> ContextListener {
-    void attributeAdded(Path attr, long timeStamp);
-    void attributeRemoved(Path attr, long timeStamp);
-    void attributeChanged(Path attr, Object oldValue, Object newValue, long timeStamp);
-    void resourceAdded(Path res, long timeStamp);
-    void resourceRemoved(Path res, long timeStamp);
-    void expressionValueChanged(long regId, Object oldValue, Object newValue, long timeStamp);
-    void conditionOccured(long regId, long timeStamp);
-}</pre>
+    <h2 id="api">User-level APIs</h2>
 
-    <p>the most convenient way being to subclass
-    <code>ContextListenerAdapter</code> and override only the required methods:</p>
+    <p>The user-level API, which is used by the client programmer, is
+      designed to be simple and easy to learn. All the interactions of
+      the programmer with WildCAT happen through an instance of
+      the <code>Context</code> class (multiple instances can be
+      created inside a single application).</p>
 
-    <pre><span class="keyword">class</span> InputDevicesListener <span class="keyword">extends</span> ContextListenerAdapter {
-    <span class="keyword">public</span> void resourceAdded(Path res, long timeStamp) {
-        System.out.println("New input device: " + res);
-    }
-    <span class="keyword">public</span> void resourceremoved(Path res, long timeStamp) {
-        System.out.println("Input device unplugged: " + res);
-    }
-}</pre>
+    <p>The first set of methods implement synhronous requests
+      (<em>pull</em> mode) and allow clients to discover the structure
+      of the context and to request the immediate value of an
+      attribute:</p>
+
+    <pre>
+      Collection&lt;Path&gt; lookup(Path query) { ... }
+      Collection&lt;Path&gt; lookup(String query) { ... }
+      Object lookupAttribute(Path attr) { ... }
+      Object lookupAttribute(String attr) { ... }
+    </pre>
+
+    <p>The main methods are <code>lookup(Path)</code>
+      and <code>lookupAttribute(Path)</code>, but both provide
+      variants taking strings instead of pre-parsed <code>Path</code>s
+      for convenience.</p>
+
+    <p><code>lookup(Path)</code> takes an absolute path as a
+      parameter, which can be either definite (i.e. representing a
+      specific location like <code>/geo/location#latitude</code>) or a
+      pattern (i.e. representing of set of potential locations,
+      like <code>/sys/devices/*</code>). It returns the paths of all
+      the elements currently in the context (resources and attributes)
+      which match the query. This method is very generic and
+      covers several use cases:</p>
+
+    <pre>
+      // Testing whether an element exists in the context
+      boolean exists = !context.lookup("/sys/devices/keyboard").isEmpty();
+
+      // Finding all the sub-resources
+      Collection&lt;Path&gt; devices = context.lookup("/sys/devices/*");
+
+      // Finding all the attributes of a resource
+      Collection&lt;Path&gt; mouseAttrs = context.lookup("/sys/devices/mouse#*");
+
+      // Finding a specific attribute on a set of resources
+      Collection&lt;Path&gt; vendors = context.lookup("/sys/devices/*#vendor");
+
+      // Finding all the siblings of a resource
+      // See the Path interface for other methods to manipulate paths
+      Collection&lt;Path&gt; siblings = context.lookup(aPath.getParent().append("*"));
+    </pre>
+
+    <p>The second method, <code>lookupAttribute(Path)</code> takes an
+      absolute path (either as a string or a real <code>Path</code>
+      object) which must designate a definite attribute (i.e. not a
+      pattern), and returns the current value of the attribute in
+      question, or <code>null</code> if it does not exist.</p>
+
+    <pre>
+      Double load = (Double) context.lookupAttribute("/sys/cpu/load#load_1min");
+    </pre>
+
+    <p>The second set of methods provided by <code>Context</code>
+      enable a client to be notified asynchronously when some events
+      of interest occur (<em>push</em> mode). These methods follow the
+      publish/subscribe pattern: the client first registers its
+      interest in a kind of event, and from this point on WildCAT will
+      send it asynchronous notifications each time a corresponding
+      event occurs. The methods in <code>Context</code> corresponding
+      to this interface are:</p>
+    
+    <pre>
+    Object register(EnumSet&lt;EventKind&gt; evtKinds, Path path, ContextListener listener) { ... }
+    Object registerExpression(EnumSet&lt;EventKind&gt; evtKinds, String expression, ContextListener listener) { ... }
+    void unregister(Object cookie) { ... }
+    </pre>
+
+    <p>The first method, <code>register()</code> takes a "bitmask"
+      representing the kinds of events the client is interested in
+      (using the <code>EventKind</code> enumeration), the path on
+      which the events must be detected (this path can be a pattern),
+      and finally a listener object (which will receive the event
+      notifications). For exemple, to get notified each time a new
+      input device is plugged or unplugged:</p>
+
+    <pre>
+      context.register(EnumSet.of(RESOURCE_ADDED, RESOURCE_REMOVED),
+                       Context.createPath("/sys/devices/input/*")), myListener);
+    </pre>
+
+    <p>Where <code>myListener</code> implements
+      the <code>ContextListener</code> interface:</p>
+
+    <pre>
+      public interface ContextListener {
+          void attributeAdded(Path attr, long timeStamp);
+          void attributeRemoved(Path attr, long timeStamp);
+          void attributeChanged(Path attr, Object oldValue, Object newValue, long timeStamp);
+          void resourceAdded(Path res, long timeStamp);
+          void resourceRemoved(Path res, long timeStamp);
+          void expressionValueChanged(Object cookie, Object oldValue, Object newValue, long timeStamp);
+          void conditionOccured(Object cookie, long timeStamp);
+      }
+    </pre>
 
     <p>The next method, <code>registerExpression()</code>, is used only in
-    combination with the <code class="constant">EXPRESSION_CHANGED</code> and
-    <code class="constant">CONDITION_OCCURED</code> event kinds (and the
-    corresponding methods in <code>ContextListener</code>). This allows clients
-    to register to more complex events. For example, if a client only wants to
-    be notified when the room temperature goes beyond 30°C, it can use the
-    following code:</p>
-    <pre>context.registerExpression(aListener, EventKinds.CONDITION_OCCURED,
-                           "geo://location/room#temperature > 30");</pre>
-    <p>instead of using a simpler <code
-    class="constant">ATTRIBUTE_CHANGED</code> event kind, and being notified a
-    many non-intersting events.</p>
+      combination with the <code>EXPRESSION_CHANGED</code>
+      and <code>CONDITION_OCCURED</code> event kinds (and the
+      corresponding methods in <code>ContextListener</code>). This
+      allows clients to register to more complex events. For example,
+      if a client only wants to be notified when the room temperature
+      goes beyond 30°C, it can use the following code:</p>
+
+    <pre>context.registerExpression(EnumSet.of(CONDITION_OCCURED),
+                           "/geo/location/room#temperature > 30",
+                           aListener);</pre>
+
+    <p>instead of using a simpler <code>ATTRIBUTE_CHANGED</code> event
+      kind, and being notified a many non-intersting events.</p>
     
-    <p>An <code class="constant">EXPRESSION_CHANGED</code> event occurs each
-    time the value of the monitored expression changes. If the expression
-    depends on multiple paths, WildCAT will automatically recompute its value
-    each time one of these paths changes. <code
-    class="constant">CONDITION_OCCURED</code> can be seen as a special case of
-    <code class="constant">EXPRESSION_CHANGED</code> for boolean expressions
-    where only the transation from <i>false</i> to <i>true</i> are
-    considered.</p>
+    <p>An <code>EXPRESSION_CHANGED</code> event occurs each
+      time the value of the monitored expression changes. If the
+      expression depends on multiple paths, WildCAT will automatically
+      recompute its value each time one of these paths
+      changes. <code>CONDITION_OCCURED</code> can be seen as a special
+      case of <code>EXPRESSION_CHANGED</code> for boolean expressions
+      where only the transation from <i>false</i> to <i>true</i> are
+      considered.</p>
 
     <p>The expressions usable with <code>registerExpression()</code> can use
-    paths, constant numbers and strings, comparison operators (<code>=</code>,
-    <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>,
-    <code>&gt;=</code>), arithmetic operations (<code>+</code>, <code>-</code>,
-    <code>*</code>, <code>/</code>, with the usual precedence rules), boolean
-    operators (<code>not</code>, <code>and</code>, <code>or</code>), and finally
-    function invocation (<code>function(arg1, arg2...)</code>). WildCAT provides
-    some predefined functions working on numbers and strings, but new functions
-    can be added easily to extend the vocabulary of synthetic expression (this
-    feature is probably the best way to extend the power of WildCAT without
-    changing its external interface).</p>
+      paths, constant numbers and strings, comparison operators
+      (<code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, 
+      <code>&lt;=</code>, <code>&gt;=</code>), arithmetic operations
+      (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>,
+      with the usual precedence rules), boolean operators
+      (<code>not</code>, <code>and</code>, <code>or</code>), and
+      finally function invocation (<code>function(arg1,
+      arg2...)</code>). WildCAT provides some predefined functions
+      working on numbers and strings, but new functions can be added
+      easily to extend the vocabulary of synthetic expression (this
+      feature is probably the best way to extend the power of WildCAT
+      without changing its external interface).</p>
 
     <p>Both <code>register()</code> and <code>registerExpression()</code> return
-    a numeric identifier corresponding to this particular subscription. This
-    number should be kept by the client, as it must be provided to
-    <code>unregister()</code> in order to disable an event subscription.</p>
+      an opaque identifier ("cookie") corresponding to this particular
+      subscription. This object should be kept by the client, as it
+      must be provided to <code>unregister()</code> in order to
+      disable an event subscription, and is also used when sending
+      notifications to listeners.</p>
 
-    <h2>Internal design</h2>
+    <h2 id="config">Configuration</h2>
 
-    <p>The following UML diagram represents the internal structure of
-    WildCAT.</p>
+    <p>When first created, an instance of <code>Context</code> does
+      not contain any resource or attribute. Before it can be used by
+      a client as described in the previous section, it must be
+      configured. This configuration can be done by the client
+      himself, but need not be: pre-configured contexts could be made
+      available to users, tailored to particular kinds of applications
+      (i.e. desktop applications, application servers, administration
+      consoles...).</p>
 
-    <p style="text-align: center">
-      <img alt="Class diagram of WildCAT internals" src="wildcat.png" />
-    </p>
+    <p>In analogy with Unix filesystems, where different filesystems
+      implementations can be integrated in a single hierarchy,
+      configuring WildCAT is done by <em>mounting</em> (and
+      unmounting) <em>context providers</em> at specific locations. A
+      context provider is simply a Java object which implements
+      the <code>ContextProvider</code> interface (see that interface's
+      documentation for more details). As a framework, WildCAT is only
+      concerned with the integration of such providers, and not on
+      their actual implementation or configuration: each specific
+      implementation provides its own configuration mechanism.</p>
 
-    <p>The framework can be decomposed in several different parts:</p>
+    <pre>
+      Context ctx = new Context();
+      MyProvider p1 = new MyProvider();
+      // configure p1
+      ctx.mount("/some/location", p1);
+      // change p1's configuration
+      SomeOtherProvider p2 = new SomeOtherProvider("configuration.file");
+      ctx.mount("/another/location", p2);
+    </pre>
 
-    <dl>
-      <dt><b>The client interface</b> (in green on the diagram).</dt>
-      <dd>This correspond to what has be described in the previous section, and
-      is the only part of WildCAT seen by standard client applications.</dd>
+    <p>However, WildCAT provides nonetheless two flexible and
+      configurable implementations of <code>ContextProvider</code>:
+      <ul>
+	<li><p><code>BasicContextProvider</code> simply implements the
+	    data model of resources and attributes as a tree of Java
+	    objects in memory. It does not provide any data by itself
+	    but is fully controllable by program: its API enable the
+	    creation/deletion of resources and attributes, and the
+	    modification of attributes value. It is designed to serve
+	    as a possible starting point for other
+	    implementations.</p></li>
+	<li><p><code>DynamicContextProvider</code>
+	    extends <code>BasicContextProvider</code> with two features:
+	    <ul>
+	      <li>the ability to define synthetic attributes, whose
+		value is the result of an expression which may involve
+		other elements in the context, and is automatically
+		recomputed when these dependencies change;</li>
+	      <li>the ability to attach <code>sensors</code> to
+		resources. Sensors are objects which monitor some part
+		of the context on request and return there measures as
+		a set of named values, which are then used to update
+		the resource's attributes. When a sensor is attached,
+		a time period is supplied.
+		The <code>DynamicContextProvider</code> will
+		automatically request new values from the sensor
+		according to this period and update the resource's
+		attributes.</li>
+	    </ul>
+	  </p>
+	</li>
+      </ul>
 
-      <dt><b>The extension interface</b> (in blue on the diagram).</dt>
-      <dd><p>The <code>ContextDomain</code> interface is the main extension
-      point of WildCAT as a framework. New implementations of the notion of
-      <em>context domain</em> can be provided if the default one is not suitable
-      to a particular domain, for example for performance reasons or to create
-      a bridge with an existing system.</p>
+    <h2 id="extension">Extension: writing adapters and providers</h2>
 
-      <pre><span class="keyword">public interface</span> ContextDomain {
-    void initialize(Context ctx);
-    String getName();
-    boolean exists(Path path);
-    Object resolve(Path attr);
-    Path[] getAttributes(Path res);
-    Path[] getChildren(Path res);
-    void register(ContextListener listener, int eventKinds, Path path);
-    void unregister(ContextListener listener, int eventKinds, Path path);
-    void update(Path path, Path cause);
-}</pre>
-      </dd>
+    <p>WildCAT distinguishes two kinds of
+      extensions: <em>adapters</em> and <em>providers</em>.</p>
 
-      <dt><b>The default, generic implementation</b> (in grey on the diagram).</dt>
-      <dd>WildCAT provides a default implementation of
-      <code>ContextDomain</code> in the <code>StandardDomain</code> class. This
-      implementation follows directly the logical model, with classes for
-      <code>Resource</code>s and <code>Attribute</code>s. The creation of the
-      initial structure of the domain and its updating is managed by the
-      <code>DomainUpdater</code>, which creates and removes resources and
-      attributes according to the specification provided by an
-      <code>XMLTemplate</code> (see below). Finally, the raw, unstructured data
-      acquisition is delegated to the last part of the WildCAT framework.</dd>
+    <p>Adapters are simple wrappers for existing sensors, to make them
+      usable by <code>DynamicContextProvider</code>. There are used
+      when the existing monitoring technology to integrate has a
+      simple, non-structured data model. For example, an adapter
+      exists for LeWYS probes (not included in the default
+      distribution), as these probes provide their data using a simple
+      model and are independent of each others.</p>
 
-      <dt><b>The data acquisition sub-framework</b> (part of the default
-      implementation, in grey on the diagram).</dt>
+    <p>Providers are more complex: they provide a full implementation
+      of the <code>ContextProvider</code> interface (maybe using one
+      of the existing implementation as a basis). They are used when
+      the technology to intergrate already provides a structured data
+      model
+      (e.g. <a
+      href="http://freedesktop.org/wiki/Software_2fhal">HAL</a>).</p>
 
-      <dd><p>This sub-framework is centered around the notion of
-      <em>sensor</em>, which represent the Java objects responsible for the
-      acquisition of raw data. The actual methods used to get the data can be
-      very varied, requiring communication with OS layers or even directly with
-      hardware; WildCAT does not offer any direct help here. However, WildCAT
-      provides the <code>SensorManager</code> class to organize all the sensors.
-      Each sensor is identified by a name, and can be either <em>started</em> or
-      <em>stopped</em>. When it is started, a sensor will send new samples to
-      the <code>SensorManager</code> asynchronously to the sensor manager, which
-      gathers all the samples it receives from every sensor and make them
-      available to its clients.</p>
-
-      <p>WildCAT distinguishes two kinds of sensors. <em>Active sensors</em>
-      implement directly the <code>Sensor</code> interface and run in their own
-      thread. They are responsible to send new samples to the sensor manager
-      when it is appropriate.</p>
-
-      <pre><span class="keyword">public interface</span> Sensor {
-    String getName();
-    void setListener(SamplesListener listener);
-    void start();
-    void stop();
-    boolean isStarted();
-}</pre>
-
-      <p><em>Passive sensors</em> are created by associating a
-      <code>Sampler</code> and a <code>Schedule</code> to create a
-      <code>SamplingSensor</code>. The sensor manager then uses a daemon to
-      invoke the sampler regularly according to its scheduling policy. Samplers
-      are very easy to implement, requiring ony one method to be
-      implemented:</p>
-
-      <pre><span class="keyword">public interface</span> Sampler {
-    SampleSet sample();
-}</pre>
-
-      <p>When invoked, this <code>sample()</code> method should return the raw
-      data corresponding to the current state of the part of the context it is
-      responsible to observe.</p>
-
-      <p>In order to make it easier to integrate WildCAT with existing systems,
-      WildCAT provides the <code>XMLCommandSensor</code> class. This class
-      implements the <code>Sampler</code> interface by invoking an external
-      program (using <code>Runtime.getRuntime().exec()</code>). The output of
-      the command should be a valid XML document representing a
-      <code>SampleSet</code> object, which is then parsed an returned by the
-      <code>XMLCommandSensor</code>. As an example, here is a simple Ruby
-      program which can be used by <code>XMLCommandSensor</code>:</p>
-
-      <pre><span class="keyword">require</span> 'wildcat'
-<span class="keyword">class</span> KernelVersionSensor &lt; Sampler
-  <span class="keyword">def</span> sample
-    uname = IO.read('/proc/version').chomp
-    version = uname.scanf('Linux version %d.%d.%d');
-    <span class="keyword">return</span> { 'uname' => uname,
-             'major-version' => version[0],
-             'minor-version' => version[1],
-             'patch-level' => version[2],
-             'version' => version.join('.') }
-  <span class="keyword">end</span>
-<span class="keyword">end</span>
-print KernelVersionSensor.new.sense</pre>
-
-      <p>The output of this program looks like this:</p>
-
-      <pre>&lt;?xml version="1.0"?&gt;
-&lt;sample-set timestamp="2005-07-19T09:15:36"&gt;
-  &lt;sample name="uname" type="string"&gt;Linux version 2.6.10-5-k7 ...&lt;/sample&gt;
-  &lt;sample name="patch-level" type="integer"&gt;10&lt;/sample&gt;
-  &lt;sample name="minor-version" type="integer"&gt;6&lt;/sample&gt;
-  &lt;sample name="version" type="string"&gt;2.6.10&lt;/sample&gt;
-  &lt;sample name="major-version" type="integer"&gt;2&lt;/sample&gt;
-&lt;/sample-set&gt;
-      </pre>
-
-      <p>and can be understood by <code>XMLCommandSensor</code>.</p>
-
-      <p>Finally, the <code>SensorFactory</code> class helps creating new sensors
-      directly from XML specifications in the format used by the default context
-      domain implementation (see below).</p>
-      </dd>
-
-    </dl>
-
-    <h2>The default context domain implementation</h2>
-
-    <p>The default implementation of <code>ContextDomain</code> is generic and
-    can be configured through an XML file. The structure of this file can be
-    seen as a template for the structure of the context domain being modeled.
-    Here is a commented example of such a file.</p>
-
-    <pre>&lt;?xml version='1.0' encoding='ISO-8859-15'?&gt;
-&lt;context-domain name="sys"&gt;
-  &lt;resource name="load"&gt;
-    &lt;sensor name="load" class="org.obasco.wildcat.sensors.LoadSensor"&gt;
-      &lt;schedule&gt;&lt;periodic period="10000"/&gt;&lt;/schedule&gt;
-    &lt;/sensor&gt;
-  &lt;/resource&gt;</pre>
-
-    <p>The main XML element is <code>context-domain</code> and indicates the
-    name of the domain being defined. Inside this element we find a
-    <code>resource</code> element, also with a name. The resource is associated
-    with a sensor defined using the name of the Java class implementing it, and
-    an embedded scheduling specific. In this case, the <code>load</code> passive
-    sensor will sampled every 10 seconds by WildCAT to get updated load values.
-    The samples returned by the sensor are automatically mapped as dynamic
-    attributes of the <code>load</code> resource.</p>
-
-    <pre>  &lt;resource name="storage"&gt;
-    &lt;resource name="disks"&gt;
-      &lt;sensor name="hda" class="org.obasco.wildcat.sensors.HardDriveSensor"&gt;
-        &lt;schedule&gt;&lt;on-create/&gt;&lt;/schedule&gt;
-        &lt;configuration&gt;
-          &lt;device&gt;/dev/hda&lt;/device&gt;
-          &lt;mode&gt;static&lt;/mode&gt;
-        &lt;/configuration&gt;
-      &lt;/sensor&gt;
-    &lt;/resource&gt;
-  &lt;/resource&gt;</pre>
-
-    <p>The next part of the file defines abstract resources named
-    <code>storage</code> and <code>disks</code> to serve as categories and
-    organize other sub-resources. The specification of resource
-    <code>hda</code>, representing the first hard drive in the host system,
-    shows how to pass configuration information to sensor classes. Such a
-    mechanism is required because a given context can have many resources of the
-    same kind (for example hard drives), and each must be observed by a
-    particular instance of the sensor class. The <code>configuration</code> XML
-    element, if present inside a sensor specification, is passed to the
-    constructor of the sensor class (here <code>HardDriveSensor</code>) to
-    configure this particular instance. The actual value passed to the
-    constructor is a parsed XML element (currently using the <a
-    href="http://jdom.org/">JDOM</a> API), and the only constraint is that it is
-    a well-formed XML fragment. Every configurable sensor class can define its
-    own "configuration file" format and is responsible for its interpretation.
-    In the example, the configuration fragment tells the
-    <code>HardDriveSensor</code> object to observe the device named
-    <code>/dev/hda</code> and to consider it a static device (i.e.
-    non-removable).</p>
-
-<pre>  &lt;resource name="network"&gt;
-    &lt;attribute name="nb_interfaces"&gt;count(*)&lt;/attributes&gt;
-    &lt;resource name="eth0"&gt;
-      &lt;sensor name="nic" class="org.obasco.wildcat.sensors.NICSensor"&gt;
-        &lt;schedule&gt;&lt;periodic period="1000"/&gt;&lt;/schedule&gt;
-        &lt;configuration&gt;&lt;device&gt;eth0&lt;/device&lt;/configuration&gt;
-      &lt;/sensor&gt;
-      &lt;attribute name="error_rate"&gt;#dropped_packets / #received_packets&lt;/attribute&gt;
-    &lt;/resource&gt;
-  &lt;/resource&gt;
-&lt;/context-domain&gt;</pre>
-
-    <p>The last part of the file deals with the network card. It uses
-    <code>attribute</code> elements to define <em>synthetic attributes</em> (as
-    opposed to the primitive ones corresponding to raw data coming from
-    sensors). The value of these attributes is defined by a expression (using
-    the same simple language as the one used with the
-    <code>registerExpression()</code> method) which can reference any part of
-    the context, including elements of other domains. WildCAT tracks the
-    dependencies between these synthetic attributes (using the
-    <code>DependencyManager</code> internal class in the architecture diagram)
-    and updates their values automatically. From the point of view of the client
-    programs, these attributes are not different from the others.</p>
-
-    <p>The current implementation of WildCAT does not support the definition of
-    dynamic context domains using the default implementation, although such a
-    feature is planned. See Chapter 5 of P.-C. David's <a
-    href="http://pcdavid.net/research/papers/david_phd2005.pdf">PhD Thesis</a>,
-    Section 5.5.4, page 89, for a description of the expected design.</p>
-
-    <hr />
-    <h2 id="publications">Publications</h2>
-
-    <p>Although it us usable independently, WildCAT was developed as a part of a
-    bigger system named <a
-    href="http://www.emn.fr/x-info/obasco/tools/safran/">SAFRAN</a>
-    (Self-Adaptive FRActal compoNents). The following publications describe
-    SAFRAN as a whole, including WildCAT.</p>
-
-    <ul>
-      <li><p><strong>Une approche par aspects pour le développement de
-      composants Fractal adaptatifs</strong> (<i>An aspect-oriented approach to
-      the development of self-adaptive Fractal components</i>)<br /> P.-C. David
-      and Thomas Ledoux, in <i>2ème Journée Francophone sur le Développement de
-      Logiciels Par Aspects (<a href="http://www.lifl.fr/jfdlpa05/">JFDLPA
-      2005</a>)</i>, Lille, France, september 2005, <em>to appear</em>. <a
-      href="http://pcdavid.net/research/papers/david-ledoux_jfdlpa2005.bib">BibTeX</a>.</p>
-
-      <blockquote title="Résumé" class="abstract">
-	<p>Les développeurs d'application sont aujourd'hui confrontés à des
-	contextes d'exécution de plus en plus variables, qui nécessitent la
-	création d'applications capables de s'adapter de façon autonome aux
-	évolutions de ces contextes. Dans cet article, nous montrons qu'une
-	approche par aspects permet de construire des applications adaptatives
-	dans lesquelles le code d'adaptation est modularisé aussi bien sur le
-	plan spatial que temporel. Concrètement, nous proposons SAFRAN, une
-	extension du modèle de composants Fractal permettant le développement de
-	l'aspect d'adaptation sous la forme de politiques réactives. Celles-ci
-	détectent les évolutions du contexte d'exécution et adaptent le
-	programme de base en le reconfigurant. SAFRAN permet ainsi de développer
-	l'aspect d'adaptation de façon modulaire et de le tisser dynamiquement
-	dans les applications.</p>
-      </blockquote>
-
-      <blockquote title="Abstract" class="abstract">
-	<p>Today application developers have to deal with an increasingly variable
-	execution context, requiring the creation of applications able to adapt
-	themselves autonomously to the evolutions of this context. In this
-	paper, we show how an aspect-oriented approach enables the development
-	of self-adaptive applications where the adaptation code is well
-	modularised, both spatially and temporally. Concretely, we propose
-	SAFRAN, an extension of the Fractal component model for the development
-	of the adaptation aspect as reactive adaptation policies. These policies
-	detect the evolutions of the execution context and adapt the base
-	program by reconfiguring it. This way, SAFRAN allows the development of
-	the adaptation aspect in a modular way and its dynamic weaving into
-	applications.</p>
-      </blockquote>
-
-      </li>
-
-      <li><p><a
-      href="http://pcdavid.net/research/papers/david_phd2005.pdf"><strong>Développement
-      de composants Fractal adaptatifs: un langage dédié à l'aspect
-      d'adaptation</strong></a> (<i>Development of self-adaptive Fractal
-      components: a domain-specific language for the adaptation aspect</i>)<br
-      />P.-C. David, PhD Thesis, École des Mines de Nantes and Universite de
-      Nantes, july 2005. <a
-      href="http://pcdavid.net/research/papers/david_phd2005.bib">BibTeX</a>, <a
-      href="http://pcdavid.net/research/papers/david_phd2005.pdf">PDF</a></p>
-
-      <blockquote title="Résumé" class="abstract">
-	<p>Les contextes toujours plus variés et dynamiques dans lesquels les
-	logiciels actuels s'exécutent leurs imposent de s'adapter de façon
-	<em>autonome</em> à ces changements. L'objectif de cette thèse est de
-	faciliter le développement de telles <em>applications adaptatives</em>,
-	en considérant l'adaptation comme un <em>aspect</em> qui doit être
-	développé séparément du reste de l'application afin de pouvoir y être
-	intégré et modifié dynamiquement. Pour cela nous proposons SAFRAN, une
-	extension du modèle de composants Fractal permettant d'associer
-	dynamiquement des politiques d'adaptation aux composants d'une
-	application. Ces politiques sont programmées dans un langage dédié sous
-	la forme de règles réactives. Leur exécution repose d'une part sur
-	WildCAT, un système permettant de détecter les évolutions du contexte
-	d'exécution (quand adapter ?), et d'autre part sur FScript, un langage
-	dédié pour la reconfiguration dynamique consistante de composants
-	Fractal (comment adapter ?).</p>
-      </blockquote>
-
-      <blockquote title="Abstract" class="abstract">
-	<p>The increasingly diverse and dynamic contexts in which current
-	applications are run imposes them to adapt and to become more
-	<em>autonomous</em>. The goal of this thesis is to ease the development
-	of such <em>self-adaptive applications</em>, by considering adaptation
-	as an <em>aspect</em> which should be defined separately from the rest
-	of the application, so as to be integrated and modified dynamically. To
-	this end we propose SAFRAN, an extension of the Fractal component model
-	enabling dynamic association of adaptation policies to the components of
-	an application. These policies are programed using a Domain-Specific
-	Language in the form of reactive rules. Their execution harnesses
-	WildCAT, a context-awareness system which can detect changes in the
-	execution context (when to adapt?), and FScript, a language dedicated to
-	dynamic and consistent reconfigurations of Fractal components (how to
-	adapt?).</p>
-      </blockquote>
-      </li>
-    </ul>
-
-    <p>Older publications on previous related work available at <a
-    href="http://pcdavid.net/research/">http://pcdavid.net/research/</a>.</p>
-
+    <p>The default WildCAT distribution does not include any adapter
+      or provider (except for an
+      example <code>FileSystemProvider</code>) in ordre to keep its
+      dependencies minimal. Several already exist or are in the work
+      however, and will be distributed separately as extensions
+      when they mature.</p>
   </body>
 </html>

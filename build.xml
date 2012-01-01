@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<project name="wildcat" default="compile" basedir=".">
+    <description>WildCAT: a generic Context-Awareness Toolkit.</description>
+
+    <!-- ================== -->
+    <!-- === Properties === -->
+    <!-- ================== -->
+
+    <!-- Inputs -->
+    <property file="build.properties" />
+    <property name="src" value="${basedir}/src" />
+    <property name="sensors" value="${basedir}/sensors" />
+    <property name="tests" value="${basedir}/tests" />
+    <property name="externals" value="${basedir}/externals" />
+    <!-- Outputs -->
+    <property name="out" value="${basedir}/output" />
+    <property name="out.build" value="${out}/build" />
+    <property name="out.tests" value="${out}/tests" />
+    <property name="out.dist" value="${out}/dist" />
+    <property name="out.dist.lib" value="${out.dist}/lib" />
+    <property name="out.dist.doc" value="${out.dist}/doc" />
+    <property name="out.dist.jdoc" value="${out.dist.doc}/javadoc" />
+    <property name="out.dist.examples" value="${out.dist}/examples" />
+    <property name="out.dist.externals" value="${out.dist}/externals" />
+    <property name="out.zip" value="${out}/zip" />
+
+    <!-- ========== -->
+    <!-- Classpaths -->
+    <!-- ========== -->
+
+    <path id="compile.classpath" description="Libraries required for compilation.">
+        <pathelement location="${antlr.jar}" />
+        <pathelement location="${monolog.jar}" />
+    </path>
+
+    <path id="run.classpath" description="Libraries required to run the product.">
+        <path refid="compile.classpath" />
+        <pathelement location="${out.build}" />
+    </path>
+
+    <path id="tests.classpath" description="Libraries required to test the product.">
+        <path refid="run.classpath" />
+        <pathelement location="${out.tests}" />
+        <pathelement location="${junit.jar}" />
+    </path>
+
+    <!-- =============== -->
+    <!-- === Targets === -->
+    <!-- =============== -->
+
+    <target name="antlr.check" description="Checks that ANTLR is correctly installed.">
+        <available classname="antlr.Tool" property="antlr.present" />
+        <fail message="Can't find ANTLR; copy ${antlr.jar} where Ant can find it (e.g. $ANT_HOME/lib)."
+              unless="antlr.present" />
+    </target>
+
+    <target name="antlr.generate"
+            depends="antlr.check"
+            description="Runs ANTLR to generate the parser's source code.">
+        <antlr target="${src}/org/objectweb/wildcat/expressions/expressions.g" />
+    </target>
+
+    <target name="compile"
+            depends="antlr.generate"
+            description="Compiles code, class files go to the ${build.dir} directory.">
+        <mkdir dir="${out.build}" />
+        <javac destdir="${out.build}" source="1.5" target="1.5">
+            <classpath refid="compile.classpath" />
+            <src path="${src}" />
+            <src path="${sensors}" />
+            <include name="**/*.java" />
+        </javac>
+        <!-- Copy resources. -->
+        <copy todir="${out.build}">
+            <fileset dir="${src}">
+                <exclude name="**/*.java" />
+                <exclude name=".cvsignore" />
+                <exclude name="**/*.g" />
+                <exclude name="**/*.smap" />
+                <exclude name="**/*TokenTypes.txt" />
+            </fileset>
+            <fileset dir="${sensors}" excludes="**/*.java" />
+        </copy>
+    </target>
+
+    <target name="tests.compile" depends="compile" description="Compiles unit tests.">
+        <mkdir dir="${out.tests}" />
+        <javac destdir="${out.tests}" source="1.5" target="1.5">
+            <classpath refid="tests.classpath" />
+            <src path="${tests}" />
+            <include name="**/*.java" />
+        </javac>
+        <!-- Copy resources (e.g. test fixtures) -->
+        <copy todir="${out.tests}">
+            <fileset dir="${tests}" excludes="**/*.java" />
+        </copy>
+    </target>
+
+    <target name="junit.check" description="Checks that JUnit is correctly installed.">
+        <available classname="org.junit.Test" property="junit.present" />
+        <fail message="Can't find JUnit; copy ${junit.jar} where Ant can find it (e.g. $ANT_HOME/lib)."
+              unless="junit.present" />
+    </target>
+
+    <target name="test" depends="junit.check,tests.compile" description="Runs unit tests.">
+        <junit haltonfailure="true">
+            <classpath refid="tests.classpath" />
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+                <fileset dir="${out.tests}" includes="**/*Tests.class" />
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="dist" depends="test" description="Prepares the product's distribution.">
+        <mkdir dir="${out.dist}" />
+        <mkdir dir="${out.dist.lib}" />
+        <jar destfile="${out.dist.lib}/${product.name}.jar" basedir="${out.build}" />
+        <copy todir="${out.dist.lib}">
+            <fileset dir="${basedir}/lib">
+                <include name="*" />
+            </fileset>
+        </copy>
+        <mkdir dir="${out.dist.externals}" />
+        <copy todir="${out.dist.externals}">
+            <fileset dir="${externals}">
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+        <copy todir="${out.dist}">
+            <fileset dir="${basedir}">
+                <include name="README" />
+                <include name="LICENSE" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="package"
+            depends="dist"
+            description="Creates the product's distribution packages.">
+        <mkdir dir="${out.zip}" />
+        <tar destfile="${out.zip}/${product.name}-${product.version}.tar.gz" compression="gzip">
+            <tarfileset dir="${basedir}" prefix="${product.name}-${product.version}">
+                <exclude name="output/**" />
+                <exclude name="output" />
+                <exclude name="**/CVS/**" />
+                <exclude name="**/CVS" />
+            </tarfileset>
+        </tar>
+        <zip destfile="${out.zip}/${product.name}-${product.version}.zip">
+            <zipfileset dir="${basedir}" prefix="${product.name}-${product.version}">
+                <exclude name="output/**" />
+                <exclude name="output" />
+                <exclude name="**/CVS/**" />
+                <exclude name="**/CVS" />
+            </zipfileset>
+        </zip>
+        <zip destfile="${out.zip}/${product.name}-${product.version}-bin.zip">
+            <zipfileset dir="${out.dist}" prefix="${product.name}-${product.version}" />
+        </zip>
+    </target>
+
+    <target name="clean" description="Removes output directory.">
+        <delete dir="${out}" />
+    </target>
+
+    <target name="cleaner"
+            depends="clean"
+            description="Removes all generated files and directories.">
+        <delete>
+            <fileset dir="${src}/org/objectweb/wildcat/expressions">
+                <include name="ExpressionsLexer.*" />
+                <include name="ExpressionsLexerTokenTypes.*" />
+                <include name="ExpressionsReader.*" />
+                <include name="ExpressionsReaderTokenTypes.*" />
+            </fileset>
+        </delete>
+    </target>
+</project>
